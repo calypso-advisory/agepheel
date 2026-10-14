@@ -10,6 +10,7 @@ const browser = await chromium.launch({ executablePath: process.env.CHROME || un
 const mobile = flags.includes('--mobile')
 const ctx = await browser.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: mobile ? 2 : 1, isMobile: mobile, hasTouch: mobile })
 const page = await ctx.newPage()
+if (process.env.SHARE) await page.goto(process.env.SHARE, { waitUntil: 'load' })
 const errors = []
 page.on('pageerror', (e) => errors.push(String(e)))
 page.on('console', (m) => m.type() === 'error' && errors.push(m.text()))

@@ -5,6 +5,7 @@ const browser = await chromium.launch({ executablePath: process.env.CHROME || un
 for (const [name, vp, throttle] of [['iPhone 390×844, CPU ÷4', { width: 390, height: 844 }, 4], ['iPad 820×1180, CPU ÷4', { width: 820, height: 1180 }, 4], ['Bureau 1440×900', { width: 1440, height: 900 }, 1]]) {
   const ctx = await browser.newContext({ viewport: vp, deviceScaleFactor: 2, isMobile: vp.width < 1000, hasTouch: vp.width < 1000 })
   const page = await ctx.newPage()
+  if (process.env.SHARE) await page.goto(process.env.SHARE, { waitUntil: 'load' })
   await page.goto(base, { waitUntil: 'networkidle' })
   await page.waitForTimeout(600)
   const cdp = await ctx.newCDPSession(page)

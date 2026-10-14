@@ -17,6 +17,8 @@ const check = (name, ok, info = '') => {
 async function newPage(opts = {}) {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, ...opts })
   const page = await ctx.newPage()
+  // site protégé (Vercel) : le lien de partage pose le cookie d'accès
+  if (process.env.SHARE) await page.goto(process.env.SHARE, { waitUntil: 'load' })
   const errors = []
   page.on('pageerror', (e) => errors.push(String(e)))
   page.on('console', (m) => m.type() === 'error' && errors.push(m.text()))
