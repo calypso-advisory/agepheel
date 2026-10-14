@@ -227,14 +227,12 @@ export function evaluate(p: number, L: Layout): FilmState {
       break
     }
     case 'results': {
-      st.clip = { id: 'c07', t: 1 }
-      st.paper = 1
-      const k = io(seg(u, 0, 0.26)) * (1 - io(seg(u, 0.8, 1)))
-      toCard(k)
-      const wipe = io(seg(u, 0.44, 0.7))
-      if (wipe > 0) st.clipB = { id: 'c08', t: 0, wipe }
-      st.texts.engag = txt(u, 0.16, 0.28, 0.44, 0.5)
-      st.texts.res = txt(u, 0.54, 0.62, 0.74, 0.82)
+      // plan de liaison : la caméra redescend de la vue du dessus jusqu'à la paroi vitrée
+      // on saute le début immobile du clip ; la plante passe devant l'objectif vers u ≈ 0,35–0,5
+      full('c07b', 0.2 + 0.8 * u)
+      st.texts.engag = txt(u, 0.04, 0.14, 0.26, 0.33)
+      st.texts.res = txt(u, 0.58, 0.68, 0.9, 1)
+      st.scrim = 1
       break
     }
     case 'glass': {

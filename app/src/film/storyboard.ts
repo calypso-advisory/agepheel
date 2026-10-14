@@ -26,6 +26,7 @@ export const CLIPS: ClipDef[] = [
   { id: 'c05', label: 'Le salarié se tourne et transmet un colis à un collègue dans la zone logistique.', focal: [[0, 0.35], [1, 0.62]] },
   { id: 'c06', label: 'Une salariée en fauteuil roulant quitte son poste et rejoint la réunion.', focal: [[0, 0.62], [1, 0.4]] },
   { id: 'c07', label: 'La caméra s’élève au-dessus de la table de réunion jusqu’à une vue de dessus.', focal: [[0, 0.4], [1, 0.5]] },
+  { id: 'c07b', label: 'La caméra redescend de la vue du dessus et traverse le bureau jusqu’à la paroi vitrée.', focal: [[0, 0.5], [0.55, 0.5], [0.62, 0.45], [1, 0.3]] },
   { id: 'c08', label: 'Elle coche une liste sur une paroi vitrée puis revient à son ordinateur, entourée de ses collègues.', focal: [[0, 0.45], [1, 0.32]] },
   { id: 'c09', label: 'La caméra s’approche lentement de son visage jusqu’à ses yeux.', focal: [[0, 0.32], [1, 0.5]] },
 ]
@@ -59,8 +60,8 @@ export const TEXTS: FilmText[] = [
   { id: 'id', text: 'Identifier les besoins.', pos: 'center', size: 'xl' },
   { id: 'build', text: 'Construire les solutions.', pos: 'center', size: 'xl' },
   { id: 'acc', text: 'Accompagner durablement.', pos: 'center', size: 'xl' },
-  { id: 'engag', text: 'Des engagements concrets.', pos: 'col', size: 'l' },
-  { id: 'res', text: 'Des résultats qui comptent.', pos: 'col', size: 'xl' },
+  { id: 'engag', text: 'Des engagements concrets.', pos: 'over', size: 'l' },
+  { id: 'res', text: 'Des résultats qui comptent.', pos: 'over', size: 'xl' },
   { id: 'action', text: 'Chaque action fait avancer l’entreprise.', pos: 'over', size: 'xl' },
 ]
 
@@ -77,7 +78,7 @@ export const BEATS = [
   { id: 'coll', len: 2.4, act: 2 },
   { id: 'desk', len: 2.0, act: 3 },
   { id: 'crane', len: 2.8, act: 3 },
-  { id: 'results', len: 2.4, act: 3 },
+  { id: 'results', len: 2.6, act: 3 },
   { id: 'glass', len: 1.8, act: 3 },
   { id: 'oeth', len: 3.6, act: 4 },
   { id: 'eyes', len: 2.2, act: 4 },
