@@ -6,7 +6,7 @@ Site immersif sur l’inclusion des personnes en situation de handicap en entrep
 
 - **Dépôt** : github.com/calypso-advisory/agepheel (branche `main`).
 - **Hébergement** : Vercel, projet `changeons-de-regard` (équipe Calypso), dossier racine `app/`. Chaque envoi sur `main` publie le site ; chaque autre branche crée un lien d'aperçu.
-- **Adresse provisoire** : changeons-de-regard-calypso12.vercel.app (protégée par l'authentification Vercel tant que le domaine définitif n'est pas branché).
+- **Adresse publique provisoire** : changeons-de-regard.vercel.app. Les adresses de chaque déploiement (`…-calypso12.vercel.app`) restent protégées par l'authentification Vercel.
 - `app/vercel.json` : renvoi de toutes les adresses vers l'application (pages `/solutions`, `/contact`…), cache des médias.
 - Tests contre une adresse protégée : `BASE=<url>/ SHARE=<lien de partage Vercel> node tests/e2e.mjs out`.
 
