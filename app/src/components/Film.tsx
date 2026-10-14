@@ -79,6 +79,7 @@ export function Film({ onFail, steps = false }: Props) {
       document.documentElement.classList.toggle('snap-steps', inFilm)
     }
     const cue = q('.fm-cue')
+    const banner = stage.querySelector<HTMLElement>('.fm-banner')
     // visiteur arrêté en plein film (portrait) : après 2 s sans défilement, l'invitation réapparaît
     let idle = false
     let idleTimer = 0
@@ -506,7 +507,14 @@ export function Film({ onFail, steps = false }: Props) {
         // pas pendant l'accueil (qui a déjà son indication), ni à la conclusion, ni par-dessus un texte du film
         const textOn = Object.values(st.texts).some((a) => a > 0.3) || st.oeth.s1 + st.oeth.s2 + st.oeth.s3 > 0.3
         const idleCue = idle && !L.land && st.beat !== 'open' && st.beat !== 'cta' && !textOn ? 1 : 0
-        op(cue, Math.max(st.cue, idleCue))
+        if (banner && !L.land) {
+          // mode étapes : bandeau permanent sous l'en-tête (de la fin de l'accueil à la conclusion) ; il remplace la bulle du bas
+          op(banner, (1 - st.hero) * (1 - st.cta))
+          op(cue, 0)
+        } else {
+          if (banner) op(banner, 0)
+          op(cue, Math.max(st.cue, idleCue))
+        }
       }
       op(knock, st.knock.opacity)
       {
@@ -718,6 +726,13 @@ export function Film({ onFail, steps = false }: Props) {
             </a>
           </div>
         </div>
+
+        {steps && (
+          <p className="fm-banner" aria-hidden="true">
+            Continuez à défiler pour découvrir
+            <span className="fm-cue-arrow" />
+          </p>
+        )}
 
         <p className="fm-cue" aria-hidden="true">
           Continuez à faire défiler pour voir la suite
