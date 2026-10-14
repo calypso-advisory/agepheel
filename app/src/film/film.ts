@@ -46,6 +46,8 @@ export interface FilmState {
   oeth: { s1: number; s2: number; s3: number; people: number; dots: number }
   cta: number
   hint: number
+  /** invitation « continuez à faire défiler » (portrait), sur les plans sans texte */
+  cue: number
   /** écran partagé : plusieurs clips, chacun dans son panneau (coordonnées de la scène) */
   panels?: (ClipRef & { r: Rect; fy?: number })[]
   /** lettres découpées : échelle du calque papier percé par le mot, opacité */
@@ -141,6 +143,7 @@ export function evaluate(p: number, L: Layout): FilmState {
     oeth: { s1: 0, s2: 0, s3: 0, people: 0, dots: 0 },
     cta: 0,
     hint: 0,
+    cue: 0,
     hero: 0,
     knock: { scale: 1, opacity: 0 },
   }
@@ -160,6 +163,8 @@ export function evaluate(p: number, L: Layout): FilmState {
     }
     case 'reveal': {
       full('c01', u)
+      // plan sans texte : sur téléphone, on invite à continuer
+      if (!L.land) st.cue = txt(u, 0.04, 0.14, 0.86, 0.98)
       break
     }
     case 'orbit': {

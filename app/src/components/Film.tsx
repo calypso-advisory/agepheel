@@ -68,6 +68,21 @@ export function Film({ onFail }: Props) {
     const bars = Array.from(stage.querySelectorAll<HTMLElement>('.fm-bar'))
     const cta = q('.fm-cta')
     const hint = q('.fm-hint')
+    const cue = q('.fm-cue')
+    // visiteur arrêté en plein film (portrait) : après 2 s sans défilement, l'invitation réapparaît
+    let idle = false
+    let idleTimer = 0
+    const armIdle = () => {
+      window.clearTimeout(idleTimer)
+      if (idle) {
+        idle = false
+        schedule()
+      }
+      idleTimer = window.setTimeout(() => {
+        idle = true
+        schedule()
+      }, 2000)
+    }
     const tools = q('.fm-tools')
     const hero = q('.fm-hero')
     const knock = q<HTMLCanvasElement>('.fm-knock')
@@ -444,6 +459,12 @@ export function Film({ onFail }: Props) {
       if (st.cta < 0.5) cta.setAttribute('inert', '')
       else cta.removeAttribute('inert')
       op(hint, st.hint)
+      {
+        // pas pendant l'accueil (qui a déjà son indication), ni à la conclusion, ni par-dessus un texte du film
+        const textOn = Object.values(st.texts).some((a) => a > 0.3) || st.oeth.s1 + st.oeth.s2 + st.oeth.s3 > 0.3
+        const idleCue = idle && !L.land && st.beat !== 'open' && st.beat !== 'cta' && !textOn ? 1 : 0
+        op(cue, Math.max(st.cue, idleCue))
+      }
       op(knock, st.knock.opacity)
       {
         // grossissement jusqu'à ce que la lettre couvre tout l'écran depuis son point d'ancrage
@@ -485,7 +506,10 @@ export function Film({ onFail }: Props) {
       if (force) forceDraw = true
       if (!raf) raf = requestAnimationFrame(render)
     }
-    const onScroll = () => schedule()
+    const onScroll = () => {
+      armIdle()
+      schedule()
+    }
     const onResize = () => {
       measure()
       schedule(true)
@@ -516,6 +540,7 @@ export function Film({ onFail }: Props) {
       window.removeEventListener('pageshow', onResize)
       ro.disconnect()
       cancelAnimationFrame(raf)
+      window.clearTimeout(idleTimer)
       for (const s of seqs.values()) s.release()
       setTheme('light')
     }
@@ -640,6 +665,11 @@ export function Film({ onFail }: Props) {
             </a>
           </div>
         </div>
+
+        <p className="fm-cue" aria-hidden="true">
+          Continuez à faire défiler pour voir la suite
+          <span className="fm-cue-arrow" />
+        </p>
 
         <p className="fm-hint" aria-hidden="true">
           <span className="fm-hint-line" />
