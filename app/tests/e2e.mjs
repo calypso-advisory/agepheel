@@ -110,7 +110,7 @@ const settle = (page, p) => page.waitForFunction((p) => Math.abs(window.__cine.p
   const hasFilm = await page.locator('.film').count()
   const h1 = await page.locator('h1').count()
   const figures = await page.locator('.editorial-item').count()
-  check('prefers-reduced-motion : parcours éditorial statique, un seul H1, 12 scènes', hasFilm === 0 && h1 === 1 && figures === 12, `film=${hasFilm} h1=${h1} scènes=${figures}`)
+  check('prefers-reduced-motion : parcours éditorial statique, un seul H1, 15 scènes', hasFilm === 0 && h1 === 1 && figures === 15, `film=${hasFilm} h1=${h1} scènes=${figures}`)
   await page.screenshot({ path: `${out}/reduced-top.png` })
   await page.screenshot({ path: `${out}/reduced-full.png`, fullPage: true })
   check('Aucune erreur console (réduit)', errors.length === 0, errors.slice(0, 3).join(' / '))

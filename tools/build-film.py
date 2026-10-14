@@ -43,7 +43,7 @@ def main():
     focal = json.load(open(sys.argv[3])) if len(sys.argv) > 3 else {}
     os.makedirs(out, exist_ok=True)
     manifest = {"fps": FPS, "variants": {"d": {"w": DW, "h": 0}, "m": {"w": MW, "h": MH}}, "clips": {}}
-    clips = sorted(f[:-4] for f in os.listdir(src) if f.endswith('.mp4') and f.startswith('c'))
+    clips = sorted(f[:-4] for f in os.listdir(src) if f.endswith('.mp4'))
     only = [c for c in os.environ.get('ONLY', '').split(',') if c]
     poster = os.environ.get('POSTER', 'c00')
     if only:

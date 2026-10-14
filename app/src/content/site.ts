@@ -25,8 +25,8 @@ export const SOLUTIONS = [
     kicker: 'Recrutement, intégration et maintien dans l’emploi',
     text: 'Identifier les opportunités, faciliter l’intégration et accompagner durablement l’emploi des personnes en situation de handicap.',
     to: '/solutions#talents',
-    image: 'scene-08',
-    alt: 'Une salariée en fauteuil roulant montre son écran à deux collègues.',
+    image: 'scene-15',
+    alt: 'En magasin, une vendeuse portant une prothèse de jambe tend un produit à son collègue.',
   },
   {
     id: 'collaborations',

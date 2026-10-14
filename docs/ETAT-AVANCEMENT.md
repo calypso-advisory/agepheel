@@ -4,25 +4,28 @@
 
 Neuf clips Runway (Kling 3.0 Pro, 5 s chacun, image de départ et image d’arrivée imposées) enchaînés en un seul film piloté par le scroll. Chaque clip se termine sur l’image où commence le suivant ; aux interludes, l’image quitte le plein écran pour une carte puis revient.
 
-| Temps | Clip / effet | Texte |
+| Temps | Clip / transition | Texte |
 |---|---|---|
-| Accueil | c00 : plan d’équipe immobile tant qu’on ne fait pas défiler, puis plongée jusque dans ses yeux | Titre « Dans chaque entreprise, il y a des talents. », phrase de promesse, bouton « Faire le point sur ma situation » (`HERO` dans `content/site.ts`) |
-| Ouverture | c01 : très gros plan sur les yeux → recul sur la salariée | — |
-| Changer d’angle | c02 : rotation autour d’elle → l’équipe | « Certains méritent simplement qu’on les regarde autrement. » |
+| Accueil | c00 : plan d’équipe immobile tant qu’on ne fait pas défiler, puis plongée dans ses yeux | Titre, promesse, bouton (`HERO`) |
+| Ouverture | c01 : des yeux, recul sur la salariée | — |
+| Changer d’angle | c02 : rotation autour d’elle | « Certains méritent… » |
 | L’écran | c03 : plongée dans l’écran vierge | « Le handicap ne définit pas un talent. » |
-| Le graphique | L’écran devient la page ; graphique HTML ; la dernière barre s’ouvre en fenêtre sur l’atelier | « Ce sont ses compétences… » / « Quand chacun apporte… » |
-| Les mains | c04 : macro des mains → recul sur l’atelier | « Des compétences différentes. » / « Une même exigence de réussite. » |
-| Logistique | c05 : de l’atelier, la caméra glisse jusqu’à l’entrepôt : un salarié en fauteuil ferme un colis | « Chaque métier a ses talents. » / « Chaque talent a sa place. » |
-| Collectif | Carte + volet vers le bureau | « Rien ne se construit seul. » / « La réussite est collective. » |
-| Le bureau | c06 : du poste de travail à la réunion | « L’inclusion ne s’improvise pas. » / « Elle se construit, ensemble. » |
-| La grue | c07 : montée jusqu’à la vue du dessus | « Identifier… » / « Construire… » / « Accompagner… » |
-| Résultats | Carte + volet vers la paroi vitrée | « Des engagements concrets. » / « Des résultats qui comptent. » |
-| La paroi | c08 : de la liste cochée à l’ordinateur | « Chaque action fait avancer l’entreprise. » |
-| OETH | Le film se range ; 20 silhouettes ; 6 points sur 100 ; la question | chiffres OETH |
+| Le graphique | L’écran devient la page ; la dernière barre s’ouvre en fenêtre | « Ce sont ses compétences… » |
+| Bras bionique | p1 : plan large puis **insert** (coupe sèche) sur sa main et le tournevis rouge | « Des compétences différentes. » / « Une même exigence… » |
+| Atelier | **raccord dans l’axe** (match cut) : même cadre, même tournevis, une autre main — c04 | « Chaque métier a ses talents. » |
+| Logistique | c05 : de l’atelier à l’entrepôt (salarié en fauteuil) | « Chaque talent a sa place. » |
+| Écran partagé | **triptyque** logistique / magasin (r1, prothèse de jambe) / bureau (o1) ; le bureau prend l’écran | « Rien ne se construit seul. » / « La réussite est collective. » |
+| Bureau | o1 : salarié avec implant auditif ; **volet par amorce** (un pilier passe devant l’objectif et cache la coupe) | « L’inclusion ne s’improvise pas. » |
+| Réunion | c06 | « Elle se construit, ensemble. » |
+| La grue | c07 : montée jusqu’à la vue du dessus | Identifier / Construire / Accompagner |
+| Liaison | c07b : redescente, la plante passe devant l’objectif | « Des engagements concrets. » / « Des résultats… » |
+| La paroi | c08 | « Chaque action fait avancer l’entreprise. » |
+| OETH | Le film se range en vignette ; 20 silhouettes ; 6 points sur 100 ; la question | chiffres OETH |
+| Le mot | **lettres découpées** : « REGARD » laisse voir l’image, grandit jusqu’à l’ouvrir en plein écran | — |
 | Les yeux | c09 : plongée jusque dans ses yeux | — |
-| Conclusion | Les yeux dans une carte, titre et boutons | CTA |
+| Conclusion | **fermeture à l’iris** : le cercle se pose à côté du titre et des boutons | CTA |
 
-Longueur : ≈ 22 hauteurs d’écran (réglage `PACE` dans `src/film/storyboard.ts`).
+Longueur : ≈ 29 hauteurs d’écran (réglage `PACE` dans `src/film/storyboard.ts`).
 
 ## Production
 

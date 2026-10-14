@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { SCENES } from '../cinematic/storyboard'
+import { ALL_SCENES } from '../cinematic/storyboard'
 import { SOLUTIONS } from '../content/site'
 
 export function Solutions() {
@@ -12,7 +12,7 @@ export function Solutions() {
         </h2>
         <ul className="solution-grid">
           {SOLUTIONS.map((s, i) => {
-            const img = SCENES.find((x) => x.id === s.image)!
+            const img = ALL_SCENES.find((x) => x.id === s.image)!
             return (
               <li key={s.id} className="solution-card">
                 <div className="solution-media">

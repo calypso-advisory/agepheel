@@ -46,6 +46,15 @@ export const SCENES: SceneAsset[] = [
   scene(12, 'La salariée travaille sur son ordinateur, entourée de collègues souriants.'),
 ]
 
+/** Scènes ajoutées au film (v3) : présentes dans la version sans animation et sur les pages intérieures. */
+export const EXTRA_SCENES = [
+  { scene: scene(13, 'À l’atelier, une salariée équipée d’un bras bionique assemble un module électronique.'), act: 2, after: null, text: 'Des compétences différentes. Une même exigence de réussite.' },
+  { scene: scene(15, 'En magasin, une vendeuse portant une prothèse de jambe tend un produit à son collègue.'), act: 2, after: 'end', text: 'Chaque talent a sa place.' },
+  { scene: scene(14, 'Au bureau, un salarié porteur d’un implant auditif travaille sur son écran avec deux collègues.'), act: 2, after: 'end', text: 'La réussite est collective.' },
+] as const
+
+export const ALL_SCENES = [...SCENES, ...EXTRA_SCENES.map((e) => e.scene)]
+
 /* ------------------------------------------------------------------ */
 /* Recalages entre photos (calculés par appariement SIFT ou par ancre) */
 /* ------------------------------------------------------------------ */

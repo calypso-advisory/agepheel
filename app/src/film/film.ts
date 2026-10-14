@@ -46,6 +46,12 @@ export interface FilmState {
   oeth: { s1: number; s2: number; s3: number; people: number; dots: number }
   cta: number
   hint: number
+  /** écran partagé : plusieurs clips, chacun dans son panneau (coordonnées de la scène) */
+  panels?: (ClipRef & { r: Rect })[]
+  /** lettres découpées : échelle du calque papier percé par le mot, opacité */
+  knock: { scale: number; opacity: number }
+  /** iris : cercle (coordonnées de la scène) hors duquel l'image est remplacée par le papier */
+  iris?: { x: number; y: number; r: number }
   /** bloc d'accueil (titre, phrase, bouton) */
   hero: number
 }
@@ -136,19 +142,13 @@ export function evaluate(p: number, L: Layout): FilmState {
     cta: 0,
     hint: 0,
     hero: 0,
+    knock: { scale: 1, opacity: 0 },
   }
   for (const t of TEXTS) st.texts[t.id] = 0
   const full = (id: string, t: number) => {
     st.clip = { id, t }
     st.frame = { R: S, C: S, opacity: 1, fill: 0 }
   }
-  /** plein écran ↔ carte (l'image se réduit avec la carte) */
-  const toCard = (k: number) => {
-    const R = lerpRect(S, card, k)
-    st.frame.R = R
-    st.frame.C = R
-  }
-
   switch (beat) {
     case 'open': {
       // plan d'équipe immobile à l'arrivée, avec titre, phrase et bouton ; puis la caméra plonge jusque dans ses yeux
@@ -187,42 +187,85 @@ export function evaluate(p: number, L: Layout): FilmState {
       const grow = io(seg(u, 0.7, 0.99))
       if (u > 0.68) {
         const bar = chartBarRect(L, draw)
-        st.clip = { id: 'c04', t: 0 }
+        st.clip = { id: 'p1', t: 0 }
         st.frame = { R: lerpRect(bar, S, grow), C: S, opacity: 1, fill: 1 - seg(u, 0.74, 0.88) }
         st.paper = 1 - seg(u, 0.92, 1)
       }
       break
     }
+    case 'arm': {
+      // plan large, puis insert (coupe sèche) sur la main bionique et le tournevis rouge…
+      // le clip contient un fondu entre 2,0 et 2,5 s : on le saute pour en faire une vraie coupe
+      full('p1', u < 0.46 ? 0.4 * seg(u, 0, 0.46) : 0.52 + 0.48 * seg(u, 0.46, 0.94))
+      st.texts.diff = txt(u, 0.08, 0.18, 0.36, 0.44)
+      st.texts.exig = txt(u, 0.54, 0.64, 0.82, 0.9)
+      st.scrim = 1 - seg(u, 0.86, 0.96)
+      break
+    }
     case 'hands': {
+      // … raccord dans l'axe : même cadre, même tournevis, une autre main (coupe franche)
       full('c04', u)
-      st.texts.diff = txt(u, 0.1, 0.22, 0.42, 0.52)
-      st.texts.exig = txt(u, 0.56, 0.68, 0.9, 1)
-      st.scrim = 1
+      st.texts.metier = txt(u, 0.4, 0.52, 0.86, 0.98)
+      st.scrim = seg(u, 0.3, 0.42)
       break
     }
     case 'logi': {
       full('c05', u)
-      st.texts.metier = txt(u, 0.1, 0.22, 0.42, 0.52)
-      st.texts.place = txt(u, 0.56, 0.68, 0.9, 1)
+      st.texts.place = txt(u, 0.6, 0.72, 0.9, 1)
       st.scrim = 1
       break
     }
-    case 'coll': {
-      // le plein écran se range dans une carte ; coupe franche vers le bureau, puis retour plein écran
+    case 'split': {
+      // écran partagé : le plan se range à gauche, le magasin et le bureau entrent ; puis le bureau prend tout l'écran
       st.clip = { id: 'c05', t: 1 }
-      st.paper = 1
-      const k = io(seg(u, 0, 0.26)) * (1 - io(seg(u, 0.8, 1)))
-      toCard(k)
-      const wipe = io(seg(u, 0.44, 0.7))
-      if (wipe > 0) st.clipB = { id: 'c06', t: 0, wipe }
-      st.texts.seul = txt(u, 0.16, 0.28, 0.44, 0.5)
-      st.texts.coll = txt(u, 0.54, 0.62, 0.74, 0.82)
+      st.frame = { R: S, C: S, opacity: 1, fill: 0 }
+      const g = Math.max(4, Math.round(L.G / 4))
+      const n = 3
+      const slot = (i: number): Rect =>
+        L.land
+          ? { x: (i * (S.w + g)) / n, y: 0, w: (S.w - (n - 1) * g) / n, h: S.h }
+          : { x: 0, y: (i * (S.h + g)) / n, w: S.w, h: (S.h - (n - 1) * g) / n }
+      const open = io(seg(u, 0, 0.28))
+      const grow = io(seg(u, 0.72, 0.98))
+      const off = (i: number): Rect => {
+        // panneaux entrants : glissent depuis le bord (droite en paysage, bas en portrait)
+        const r = slot(i)
+        const d = L.land ? S.w - r.x : S.h - r.y
+        return L.land ? { ...r, x: r.x + d } : { ...r, y: r.y + d }
+      }
+      const out = (i: number): Rect => {
+        // à l'agrandissement, les autres panneaux sortent par le bord opposé
+        const r = slot(i)
+        return L.land ? { ...r, x: r.x - S.w } : { ...r, y: r.y - S.h }
+      }
+      let p0 = lerpRect(S, slot(0), open)
+      let p1 = lerpRect(off(1), slot(1), io(seg(u, 0.06, 0.32)))
+      let p2 = lerpRect(off(2), slot(2), io(seg(u, 0.12, 0.38)))
+      if (grow > 0) {
+        p0 = lerpRect(slot(0), out(0), grow)
+        p1 = lerpRect(slot(1), out(1), grow)
+        p2 = lerpRect(slot(2), S, grow)
+      }
+      st.panels = [
+        { id: 'c05', t: 1, r: p0 },
+        { id: 'r1', t: seg(u, 0.1, 0.9), r: p1 },
+        { id: 'o1', t: 0, r: p2 },
+      ]
+      st.texts.seul = txt(u, 0.3, 0.4, 0.5, 0.56)
+      st.texts.coll = txt(u, 0.56, 0.64, 0.74, 0.8)
+      st.scrim = seg(u, 0.24, 0.34) * (1 - seg(u, 0.78, 0.86))
+      break
+    }
+    case 'office': {
+      // la caméra glisse derrière un pilier : la coupe vers la réunion voisine est cachée par le premier plan
+      full('o1', u)
+      st.texts.impro = txt(u, 0.08, 0.2, 0.38, 0.46)
+      st.scrim = 1 - seg(u, 0.4, 0.5)
       break
     }
     case 'desk': {
       full('c06', u)
-      st.texts.impro = txt(u, 0.1, 0.22, 0.42, 0.52)
-      st.texts.ensemble = txt(u, 0.56, 0.68, 0.9, 1)
+      st.texts.ensemble = txt(u, 0.2, 0.32, 0.86, 0.98)
       st.scrim = 1
       break
     }
@@ -250,33 +293,48 @@ export function evaluate(p: number, L: Layout): FilmState {
       break
     }
     case 'oeth': {
-      // le film se range et laisse place aux chiffres, puis revient
+      // le film se range en vignette et laisse place aux chiffres
       st.clip = { id: 'c08', t: 1 }
       st.paper = 1
-      const away = io(seg(u, 0, 0.12))
-      const back = io(seg(u, 0.9, 1))
+      const away = io(seg(u, 0, 0.13))
       const small: Rect = L.land
         ? { x: L.W - L.G - L.W * 0.12, y: L.H - L.G - L.W * 0.12 * 0.5625, w: L.W * 0.12, h: L.W * 0.12 * 0.5625 }
         : { x: L.W - L.G - L.W * 0.3, y: L.H - L.G - L.W * 0.3 * 0.5625, w: L.W * 0.3, h: L.W * 0.3 * 0.5625 }
-      const R = back > 0 ? lerpRect(small, S, back) : lerpRect(S, small, away)
-      st.frame = { R, C: R, opacity: back > 0 ? 1 : 1 - seg(u, 0.08, 0.14), fill: 0 }
-      st.oeth.s1 = txt(u, 0.1, 0.18, 0.36, 0.42)
-      st.oeth.people = seg(u, 0.14, 0.32)
-      st.oeth.s2 = txt(u, 0.42, 0.5, 0.66, 0.72)
-      st.oeth.dots = seg(u, 0.46, 0.62)
-      st.oeth.s3 = txt(u, 0.72, 0.8, 0.9, 0.96)
+      const R = lerpRect(S, small, away)
+      st.frame = { R, C: R, opacity: 1 - seg(u, 0.09, 0.15), fill: 0 }
+      st.oeth.s1 = txt(u, 0.11, 0.2, 0.38, 0.44)
+      st.oeth.people = seg(u, 0.15, 0.34)
+      st.oeth.s2 = txt(u, 0.44, 0.52, 0.68, 0.74)
+      st.oeth.dots = seg(u, 0.48, 0.64)
+      st.oeth.s3 = txt(u, 0.75, 0.83, 0.94, 1)
+      break
+    }
+    case 'word': {
+      // lettres découpées : le mot géant laisse voir le dernier plan ; il grandit jusqu'à ce que l'image remplisse l'écran
+      full('c09', 0)
+      st.paper = 1 - seg(u, 0.86, 0.96)
+      const k = Math.pow(seg(u, 0.32, 0.94), 2.6)
+      // le calque papier reste opaque ; c'est l'image qui apparaît dans les lettres, puis le calque s'efface quand il a tout ouvert
+      st.knock = { scale: k, opacity: 1 - seg(u, 0.62, 0.8) }
+      st.frame.opacity = out(seg(u, 0, 0.18))
       break
     }
     case 'eyes': {
-      full('c09', seg(u, 0, 0.92))
-      st.paper = 1 - seg(u, 0, 0.05)
+      full('c09', seg(u, 0, 0.94))
       break
     }
     case 'cta': {
-      st.clip = { id: 'c09', t: 1 }
-      st.paper = 1
-      toCard(io(seg(u, 0, 0.45)))
-      st.cta = out(seg(u, 0.3, 0.7))
+      // fermeture à l'iris : le regard se resserre en un cercle qui vient se poser à côté de la conclusion
+      full('c09', 1)
+      const k = io(seg(u, 0, 0.55))
+      const diag = Math.hypot(L.W, L.H) / 2
+      const eye = { x: L.W * 0.5, y: L.H * 0.46 }
+      const rest = L.land
+        ? { x: card.x + card.w * 0.5, y: card.y + card.h * 0.5, r: Math.min(card.w, card.h) * 0.42 }
+        : { x: card.x + card.w * 0.5, y: card.y + card.h * 0.5, r: Math.min(card.w, card.h) * 0.46 }
+      st.iris = { x: lerp(eye.x, rest.x, k), y: lerp(eye.y, rest.y, k), r: lerp(diag * 1.05, rest.r, k) }
+      st.paper = seg(u, 0.05, 0.3)
+      st.cta = out(seg(u, 0.4, 0.75))
       break
     }
   }

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { SCENES } from '../cinematic/storyboard'
+import { ALL_SCENES } from '../cinematic/storyboard'
 import { ContactForm } from '../components/ContactForm'
 import { OETH, SOLUTIONS } from '../content/site'
 import { usePageMeta } from './usePageMeta'
@@ -11,7 +11,7 @@ import { usePageMeta } from './usePageMeta'
  */
 
 function PageHero({ eyebrow, title, intro, image }: { eyebrow: string; title: string; intro: string; image?: string }) {
-  const img = image ? SCENES.find((s) => s.id === image) : undefined
+  const img = image ? ALL_SCENES.find((s) => s.id === image) : undefined
   return (
     <header className="page-hero">
       <div className="container page-hero-grid">
@@ -36,7 +36,7 @@ export function SolutionsPage() {
   usePageMeta('Nos solutions — Changeons de regard', 'Révéler les talents, développer des collaborations avec le secteur adapté et protégé, y voir clair sur vos obligations.')
   return (
     <>
-      <PageHero eyebrow="Nos solutions" title="Passer du constat à l’action." intro="Trois axes pour avancer, selon votre situation." image="scene-09" />
+      <PageHero eyebrow="Nos solutions" title="Passer du constat à l’action." intro="Trois axes pour avancer, selon votre situation." image="scene-13" />
       <div className="container prose">
         {SOLUTIONS.map((s) => (
           <section key={s.id} id={s.id} className="prose-section">
@@ -60,7 +60,7 @@ export function OethPage() {
         eyebrow="Comprendre l’OETH"
         title="L’obligation d’emploi, en clair."
         intro="Les grands repères pour situer votre entreprise. Informations générales, à faire valider avant publication."
-        image="scene-10"
+        image="scene-14"
       />
       <div className="container prose">
         <section className="prose-section">

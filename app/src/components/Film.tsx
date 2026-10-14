@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { CTA, HERO, OETH } from '../content/site'
 import { FrameSequence, type SeqIndex } from '../film/sequence'
 import { beatStart, chartBarRect, computeLayout, evaluate, TOTAL, type FilmState, type Layout, type Rect } from '../film/film'
-import { ACTS, BEATS, CHART_BARS, CLIPS, TEXTS } from '../film/storyboard'
+import { ACTS, BEATS, CHART_BARS, CLIPS, KNOCKOUT_WORD, TEXTS } from '../film/storyboard'
 import { useTheme } from './themeContext'
 
 const base = import.meta.env.BASE_URL
@@ -57,6 +57,9 @@ export function Film({ onRequestStatic, onFail }: Props) {
     const cta = q('.fm-cta')
     const hint = q('.fm-hint')
     const hero = q('.fm-hero')
+    const knock = q<HTMLCanvasElement>('.fm-knock')
+    const PAPER = '#f7f8f6'
+    const NIGHT = '#0e1922'
     const rail = q('.fm-rail-fill')
     const oeth = {
       s1: q('[data-o="s1"]'),
@@ -140,13 +143,17 @@ export function Film({ onRequestStatic, onFail }: Props) {
         buildSeqs()
       }
       layoutChart()
+      layoutKnock()
       top = sec.getBoundingClientRect().top + window.scrollY
       dist = Math.max(1, sec.offsetHeight - stage.clientHeight)
       lastDrawKey = ''
     }
 
-    /** dessine l'image du clip, cadrée « cover » dans la zone C (coordonnées du canvas) */
-    const drawClip = (id: string, t: number, C: Rect, clipTop?: number) => {
+    /**
+     * dessine l'image du clip, cadrée « cover » dans la zone C (coordonnées du canvas) ;
+     * dst : sous-rectangle de C (écran partagé), clipTop : volet vertical
+     */
+    const drawClip = (id: string, t: number, C: Rect, clipTop?: number, dst?: Rect) => {
       const s = seqs.get(id)
       if (!s) return false
       if (!s.loaded) {
@@ -159,29 +166,69 @@ export function Film({ onRequestStatic, onFail }: Props) {
       s.request(i - dir)
       const bm = s.nearest(i)
       if (!bm) return false
-      const sx = canvas.width / L.W
-      const sy = canvas.height / L.H
       // zone de contenu C étirée sur toute la toile (la toile est ensuite transformée vers C)
       const kx = canvas.width / C.w
       const ky = canvas.height / C.h
-      const cover = Math.max(C.w / bm.width, C.h / bm.height)
+      const D = dst ?? { x: 0, y: 0, w: C.w, h: C.h }
+      const cover = Math.max(D.w / bm.width, D.h / bm.height)
       const w = bm.width * cover
       const h = bm.height * cover
       const fx = variant === 'd' ? focalOf(id, t) : 0.5
-      const x = Math.min(0, Math.max(C.w - w, C.w / 2 - fx * w))
-      const y = (C.h - h) / 2
+      // en bande horizontale (portrait), on garde le haut du cadre, où sont les visages
+      const fy = dst && variant === 'm' ? 0.4 : 0.5
+      const x = D.x + Math.min(0, Math.max(D.w - w, D.w / 2 - fx * w))
+      const y = D.y + Math.min(0, Math.max(D.h - h, D.h / 2 - fy * h))
       ctx.save()
-      if (clipTop !== undefined) {
+      ctx.setTransform(kx, 0, 0, ky, 0, 0)
+      if (clipTop !== undefined || dst) {
         ctx.beginPath()
-        ctx.rect(0, clipTop * ky, canvas.width, canvas.height)
+        if (dst) ctx.rect(D.x, D.y, D.w, D.h)
+        else ctx.rect(0, clipTop! * C.h, C.w, C.h)
         ctx.clip()
       }
-      ctx.setTransform(kx, 0, 0, ky, 0, 0)
       ctx.drawImage(bm, x, y, w, h)
       ctx.restore()
-      void sx
-      void sy
       return true
+    }
+
+    /** calque papier percé par le mot géant ; renvoie le point d'ancrage du zoom (au cœur d'une lettre) */
+    let knockAnchor = { x: 0, y: 0, d: 1 }
+    const layoutKnock = () => {
+      const kd = Math.min(2, window.devicePixelRatio || 1)
+      knock.width = Math.round(L.W * kd)
+      knock.height = Math.round(L.H * kd)
+      const k = knock.getContext('2d')!
+      k.setTransform(kd, 0, 0, kd, 0, 0)
+      k.globalCompositeOperation = 'source-over'
+      k.fillStyle = PAPER
+      k.fillRect(0, 0, L.W, L.H)
+      const family = getComputedStyle(stage).fontFamily || 'sans-serif'
+      let size = L.H * 0.4
+      k.font = `800 ${size}px ${family}`
+      const m = k.measureText(KNOCKOUT_WORD).width
+      size = Math.min(size, (size * L.W * 0.9) / m)
+      k.font = `800 ${size}px ${family}`
+      k.textAlign = 'center'
+      k.textBaseline = 'middle'
+      k.globalCompositeOperation = 'destination-out'
+      k.fillText(KNOCKOUT_WORD, L.W / 2, L.H / 2)
+      // point le plus éloigné de tout papier, cherché sur une grille grossière
+      const img = k.getImageData(0, 0, knock.width, knock.height).data
+      const step = Math.max(2, Math.round(size / 40))
+      const open = (x: number, y: number) => img[(Math.round(y * kd) * knock.width + Math.round(x * kd)) * 4 + 3] < 128
+      let best = { x: L.W / 2, y: L.H / 2, d: 1 }
+      const y0 = L.H / 2 - size * 0.4
+      const y1 = L.H / 2 + size * 0.4
+      for (let y = y0; y <= y1; y += step) {
+        for (let x = L.W * 0.05; x <= L.W * 0.95; x += step) {
+          if (!open(x, y)) continue
+          let d = step
+          while (d < size && open(x + d, y) && open(x - d, y) && open(x, y + d) && open(x, y - d) && open(x + d * 0.7, y + d * 0.7) && open(x - d * 0.7, y - d * 0.7) && open(x + d * 0.7, y - d * 0.7) && open(x - d * 0.7, y + d * 0.7)) d += step
+          if (d > best.d) best = { x, y, d }
+        }
+      }
+      knockAnchor = best
+      knock.style.transformOrigin = `${best.x}px ${best.y}px`
     }
 
     const preload = (st: FilmState) => {
@@ -217,11 +264,39 @@ export function Film({ onRequestStatic, onFail }: Props) {
       const ia = sa ? Math.round(st.clip.t * (sa.count - 1)) : -1
       const sb = st.clipB ? seqs.get(st.clipB.id) : undefined
       const ib = st.clipB && sb ? Math.round(st.clipB.t * (sb.count - 1)) : -1
-      const key = `${st.clip.id}:${ia}|${C.w.toFixed(0)}x${C.h.toFixed(0)}|${st.clipB ? st.clipB.id + ':' + ib + ':' + st.clipB.wipe.toFixed(3) : ''}`
+      const pk = st.panels ? st.panels.map((q) => `${q.id}:${q.t.toFixed(3)}:${q.r.x.toFixed(0)},${q.r.y.toFixed(0)},${q.r.w.toFixed(0)},${q.r.h.toFixed(0)}`).join(';') : ''
+      const ik = st.iris ? `${st.iris.x.toFixed(1)},${st.iris.y.toFixed(1)},${st.iris.r.toFixed(1)}` : ''
+      const key = `${st.clip.id}:${ia}|${C.w.toFixed(0)}x${C.h.toFixed(0)}|${st.clipB ? st.clipB.id + ':' + ib + ':' + st.clipB.wipe.toFixed(3) : ''}|${pk}|${ik}`
       if (key !== lastDrawKey || forceDraw) {
         forceDraw = false
-        const ok = drawClip(st.clip.id, st.clip.t, C)
-        if (st.clipB) drawClip(st.clipB.id, st.clipB.t, C, 1 - st.clipB.wipe)
+        let ok: boolean
+        if (st.panels) {
+          // écran partagé : fond de nuit visible dans les interstices
+          ctx.setTransform(1, 0, 0, 1, 0, 0)
+          ctx.fillStyle = NIGHT
+          ctx.fillRect(0, 0, canvas.width, canvas.height)
+          ok = true
+          for (const q of st.panels) {
+            if (q.r.x >= L.W || q.r.y >= L.H || q.r.x + q.r.w <= 0 || q.r.y + q.r.h <= 0) continue
+            ok = drawClip(q.id, q.t, C, undefined, q.r) && ok
+          }
+        } else {
+          ok = drawClip(st.clip.id, st.clip.t, C)
+          if (st.clipB) drawClip(st.clipB.id, st.clipB.t, C, 1 - st.clipB.wipe)
+        }
+        if (ok && st.iris) {
+          // iris : tout ce qui est hors du cercle devient papier
+          const kx = canvas.width / C.w
+          const ky = canvas.height / C.h
+          ctx.save()
+          ctx.setTransform(kx, 0, 0, ky, 0, 0)
+          ctx.beginPath()
+          ctx.rect(0, 0, C.w, C.h)
+          ctx.arc(st.iris.x - C.x, st.iris.y - C.y, Math.max(0.5, st.iris.r), 0, Math.PI * 2, true)
+          ctx.fillStyle = PAPER
+          ctx.fill('evenodd')
+          ctx.restore()
+        }
         if (ok) {
           lastDrawKey = key
           if (!readyFlag) {
@@ -238,7 +313,7 @@ export function Film({ onRequestStatic, onFail }: Props) {
         const d = Math.min(1, Math.max(0, (st.chart.draw - i * 0.08) / 0.68))
         set(b, 'transform', `scaleY(${d.toFixed(3)})`)
         // la dernière barre cède la place à la fenêtre vidéo
-        if (i === bars.length - 1) op(b, st.frame.fill > 0 && st.clip.id === 'c04' ? 0 : 1)
+        if (i === bars.length - 1) op(b, st.frame.fill > 0 && st.clip.id === 'p1' ? 0 : 1)
       })
       for (const t of texts) {
         const a = st.texts[t.id] ?? 0
@@ -254,6 +329,13 @@ export function Film({ onRequestStatic, onFail }: Props) {
       if (st.cta < 0.5) cta.setAttribute('inert', '')
       else cta.removeAttribute('inert')
       op(hint, st.hint)
+      op(knock, st.knock.opacity)
+      {
+        // grossissement jusqu'à ce que la lettre couvre tout l'écran depuis son point d'ancrage
+        const reach = Math.hypot(Math.max(knockAnchor.x, L.W - knockAnchor.x), Math.max(knockAnchor.y, L.H - knockAnchor.y))
+        const K = Math.max(1, (reach / knockAnchor.d) * 1.15)
+        set(knock, 'transform', `scale(${(1 + st.knock.scale * (K - 1)).toPrecision(6)})`)
+      }
       op(hero, st.hero)
       set(hero, 'transform', `translate3d(0,${((1 - st.hero) * -24).toFixed(1)}px,0)`)
       if (st.hero < 0.5) hero.setAttribute('inert', '')
@@ -355,6 +437,7 @@ export function Film({ onRequestStatic, onFail }: Props) {
           <div className="fm-fill" />
         </div>
         <div className="fm-scrim" aria-hidden="true" />
+        <canvas className="fm-knock" aria-hidden="true" />
 
         <div className="fm-hero">
           <h1>{HERO.title}</h1>

@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom'
-import { ACTS, SCENES, STORYBOARD } from '../cinematic/storyboard'
+import { ACTS, EXTRA_SCENES, SCENES, STORYBOARD } from '../cinematic/storyboard'
 import { CTA, OETH } from '../content/site'
 
 /**
- * Parcours éditorial statique : les 12 scènes et tous les messages du récit, sans mouvement.
+ * Parcours éditorial statique : les scènes et tous les messages du récit, sans mouvement.
  * - visible pour « prefers-reduced-motion », sans WebGL, ou sur demande (« Version sans animation ») ;
  * - en mode film, rendu en version masquée pour les lecteurs d'écran et l'indexation.
  */
@@ -15,6 +15,12 @@ export function EditorialStory({ visuallyHidden = false, onRequestFilm }: { visu
     byScene.set(sc, [...(byScene.get(sc) ?? []), ...(seg.texts ?? []).map((t) => t.text)])
   }
   const actOf = (sceneId: string) => STORYBOARD.find((s) => s.type === 'shot' && s.layers[0].scene === sceneId)?.act ?? 1
+  for (const e of EXTRA_SCENES) byScene.set(e.scene.id, [e.text])
+  const scenesOf = (act: number) => [
+    ...EXTRA_SCENES.filter((e) => e.act === act && e.after === null).map((e) => e.scene),
+    ...SCENES.filter((s) => actOf(s.id) === act),
+    ...EXTRA_SCENES.filter((e) => e.act === act && e.after === 'end').map((e) => e.scene),
+  ]
 
   return (
     <section className={visuallyHidden ? 'sr-only' : 'editorial'} aria-label="Le récit, en version texte et images">
@@ -33,7 +39,7 @@ export function EditorialStory({ visuallyHidden = false, onRequestFilm }: { visu
         <div key={a.act} className="editorial-act">
           <h2 className="editorial-act-title">{a.label}</h2>
           <ol className="editorial-list">
-            {SCENES.filter((s) => actOf(s.id) === a.act).map((s) => {
+            {scenesOf(a.act).map((s) => {
               const texts = byScene.get(s.id) ?? []
               return (
                 <li key={s.id} className="editorial-item">
