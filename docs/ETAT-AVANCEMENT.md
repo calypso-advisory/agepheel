@@ -39,6 +39,13 @@ Même film, mise en scène adaptée (le bureau n'est pas modifié) :
 - « REGARD » à la verticale, sur toute la hauteur ;
 - conclusion : l'image suit le cercle, l'œil reste au centre (recadrage mobile du dernier plan corrigé).
 
+## Mobile (portrait) — une étape par geste
+
+- 27 arrêts (`STOPS` dans `storyboard.ts`), chacun sur un moment complet ; l'aimantation native du navigateur (scroll-snap, `scroll-snap-stop: always`) choisit l'arrêt suivant, un geste ample n'en saute aucun.
+- Le film rejoint l'arrêt à son propre rythme (≈ 0,5 hauteur d'écran par seconde, 1,2 à 2,6 s, départ et arrivée adoucis) : `paced()` dans `Film.tsx`.
+- Bandeau « Continuez à défiler pour découvrir » sous l'en-tête, de la fin de l'accueil à la conclusion.
+- Après le film, un geste mène à « Solutions » ; la suite de la page défile librement. Ordinateur : défilement libre inchangé.
+
 ## Chargement
 
 - Paquets nommés par empreinte de contenu (`tools/finalize-media.py`) : un clip régénéré change d’adresse, aucun cache ne ressort l’ancien.

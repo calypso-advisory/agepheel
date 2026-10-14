@@ -1,6 +1,6 @@
 import { Logo } from './components/Logo'
 import { useEffect, useRef } from 'react'
-import { BrowserRouter, HashRouter, Link, Outlet, Route, Routes, useLocation } from 'react-router-dom'
+import { BrowserRouter, HashRouter, Link, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import { Navigation } from './components/Navigation'
 import { ThemeProvider } from './components/themeContext'
 import { BRAND, NAV } from './content/site'
@@ -72,8 +72,8 @@ export default function App() {
         <Routes>
           <Route element={<Layout />}>
             <Route index element={<Home />} />
-            {/* essai du défilement par étapes (mobile), non indexé */}
-            <Route path="essai-etapes" element={<Home steps />} />
+            {/* ancienne page d'essai du défilement par étapes : renvoie vers l'accueil */}
+            <Route path="essai-etapes" element={<Navigate to="/" replace />} />
             <Route path="solutions" element={<SolutionsPage />} />
             <Route path="comprendre-oeth" element={<OethPage />} />
             <Route path="entreprises-adaptees-esat" element={<EaEsatPage />} />

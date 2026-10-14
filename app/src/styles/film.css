@@ -639,7 +639,7 @@
   }
 }
 
-/* ------------------------------ Essai : une étape par geste (mobile) ------------------------------ */
+/* ------------------------------ Portrait : une étape par geste ------------------------------ */
 html.snap-steps {
   scroll-snap-type: y mandatory;
 }

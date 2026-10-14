@@ -30,7 +30,7 @@ interface Manifest {
 
 interface Props {
   onFail: () => void
-  /** essai : en portrait, chaque geste mène à l'arrêt suivant (aimantation native du navigateur) */
+  /** en portrait, chaque geste mène à l'arrêt suivant (aimantation native) ; le film le rejoint à son rythme */
   steps?: boolean
 }
 const STOP_P = STOPS.map((s) => beatPoint(s.beat, s.u))

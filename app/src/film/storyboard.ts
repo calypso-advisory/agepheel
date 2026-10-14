@@ -114,7 +114,7 @@ export const KNOCKOUT_WORD = 'REGARD'
 export const CHART_BARS = ['Écoute', 'Rigueur', 'Créativité', 'Fiabilité', 'Engagement']
 
 /**
- * Arrêts du mode « une étape par geste » (mobile, essai) : chaque arrêt tombe sur un moment complet
+ * Arrêts du mode « une étape par geste » (portrait) : chaque arrêt tombe sur un moment complet
  * (texte entièrement affiché, chiffre, écran partagé…). u = progression locale dans le temps.
  */
 export const STOPS: { beat: BeatId; u: number }[] = [
