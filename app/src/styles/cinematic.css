@@ -1,0 +1,469 @@
+/* ============================ Film épinglé ============================ */
+
+.film {
+  position: relative;
+  height: calc(var(--film-len) * 100vh);
+  background: #17212b;
+}
+
+.film-viewport {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  width: 100%;
+  overflow: hidden;
+  background: #17212b;
+  color: var(--white);
+  isolation: isolate;
+}
+
+.film-poster,
+.film-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.film-poster {
+  object-fit: cover;
+  object-position: 50% 50%;
+}
+.film-canvas {
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.is-ready .film-canvas {
+  opacity: 1;
+}
+
+.film-overlays {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* ---------------------------- Textes de récit ---------------------------- */
+
+.cine-text {
+  position: absolute;
+  max-width: 86vw;
+  will-change: opacity, transform;
+  --pad-x: clamp(20px, 6vw, 112px);
+  --pad-y: clamp(84px, 12vh, 150px);
+}
+.size-xl .cine-text-inner {
+  max-width: 13ch;
+}
+.size-l .cine-text-inner {
+  max-width: 16ch;
+}
+.cine-text-inner {
+  margin: 0;
+  color: var(--white);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.04;
+  text-wrap: balance;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 6px 28px rgba(0, 0, 0, 0.35);
+  position: relative;
+}
+/* masque de contraste local : un halo sombre diffus derrière le texte, jamais un bandeau */
+.cine-text::before {
+  content: '';
+  position: absolute;
+  inset: -45% -30% -45% -35%;
+  background: radial-gradient(closest-side, rgba(9, 19, 28, 0.62), rgba(9, 19, 28, 0.32) 55%, rgba(9, 19, 28, 0) 100%);
+  filter: blur(6px);
+  z-index: -1;
+}
+.size-xl .cine-text-inner {
+  font-size: clamp(2.5rem, 1.2rem + 4.6vw, 6.25rem);
+}
+.size-l .cine-text-inner {
+  font-size: clamp(2.1rem, 1.2rem + 3.2vw, 4.25rem);
+  font-weight: 650;
+}
+.size-m .cine-text-inner {
+  font-size: clamp(1.5rem, 1.2rem + 1.4vw, 2.5rem);
+}
+
+.pos-bottom-left {
+  left: var(--pad-x);
+  bottom: var(--pad-y);
+}
+.pos-bottom-right {
+  right: calc(var(--pad-x) + 56px);
+  bottom: var(--pad-y);
+  text-align: right;
+}
+.pos-top-left {
+  left: var(--pad-x);
+  top: calc(var(--nav-h) + 6vh);
+}
+.pos-top-right {
+  right: calc(var(--pad-x) + 56px);
+  top: calc(var(--nav-h) + 6vh);
+  text-align: right;
+}
+.pos-center-left {
+  left: var(--pad-x);
+  top: 50%;
+  margin-top: -1em;
+}
+.pos-center {
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  text-align: center;
+}
+
+.only-narrow {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .cine-text,
+  .cine-text.size-l {
+    left: 20px !important;
+    right: 20px !important;
+    bottom: 48px !important;
+    top: auto !important;
+    max-width: none;
+    text-align: left !important;
+    translate: none;
+  }
+  .cine-text::before {
+    inset: -60% -20px -40% -20px;
+  }
+  .only-wide {
+    display: none;
+  }
+  .only-narrow {
+    display: inline;
+  }
+}
+
+/* ---------------------------- Surface graphique (OETH) ---------------------------- */
+
+.paper {
+  position: absolute;
+  inset: 0;
+  background: var(--paper);
+  --v: 0;
+}
+.paper[data-mode='circle'] {
+  clip-path: circle(calc(var(--v) * 130vmax) at 74% 70%);
+}
+.paper[data-mode='wipe'] {
+  clip-path: inset(0 0 calc((1 - var(--v)) * 100%) 0);
+}
+
+.oeth-step {
+  position: absolute;
+  left: clamp(20px, 9vw, 160px);
+  right: clamp(20px, 9vw, 160px);
+  top: 50%;
+  transform: translateY(calc(-50% + (1 - var(--v, 0)) * 28px));
+  opacity: var(--v, 0);
+  color: var(--ink);
+  max-width: 1100px;
+}
+.oeth-figure {
+  margin: 0;
+  font-size: clamp(7rem, 4rem + 18vw, 21rem);
+  font-weight: 800;
+  line-height: 0.85;
+  letter-spacing: -0.06em;
+  color: var(--blue);
+}
+.oeth-text {
+  font-size: clamp(1.35rem, 1rem + 1.6vw, 2.5rem);
+  font-weight: 650;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  color: var(--blue-deep);
+  max-width: 26ch;
+  margin-top: 0.6em;
+}
+.oeth-note {
+  font-size: 0.9rem;
+  color: var(--muted);
+  max-width: 70ch;
+  margin-top: 1.5em;
+  line-height: 1.5;
+}
+.oeth-title {
+  font-size: clamp(2.5rem, 1.4rem + 4.4vw, 6rem);
+  font-weight: 750;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  color: var(--blue-deep);
+  max-width: 16ch;
+  margin: 0;
+}
+.oeth-question .oeth-text {
+  font-weight: 500;
+  color: var(--muted);
+}
+
+/* ---------------------------- Conclusion / CTA ---------------------------- */
+
+.cta-panel {
+  position: absolute;
+  right: clamp(56px, 7vw, 132px);
+  bottom: clamp(72px, 10vh, 120px);
+  width: min(540px, 40vw);
+  transform: translateY(calc((1 - var(--v, 0)) * 24px));
+  opacity: var(--v, 0);
+  pointer-events: auto;
+  color: var(--blue-deep);
+}
+.cta-panel::before {
+  content: '';
+  position: absolute;
+  inset: -28% -22% -30% -20%;
+  background: radial-gradient(closest-side, rgba(247, 248, 246, 0.94), rgba(247, 248, 246, 0.78) 55%, rgba(247, 248, 246, 0));
+  z-index: -1;
+}
+.cta-title {
+  font-size: clamp(2.1rem, 1.3rem + 2.6vw, 4.25rem);
+  color: var(--blue-deep);
+  margin-bottom: 0.4em;
+}
+.cta-text {
+  font-size: clamp(1.05rem, 0.95rem + 0.4vw, 1.3rem);
+  color: #2b3a46;
+  max-width: 40ch;
+}
+.cta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 760px) {
+  .cta-panel {
+    left: 20px;
+    right: 20px;
+    width: auto;
+    top: auto;
+    bottom: 28px;
+    transform: translateY(calc((1 - var(--v, 0)) * 24px));
+  }
+  .cta-panel::before {
+    inset: -30% -20px -20px -20px;
+    background: linear-gradient(to top, rgba(247, 248, 246, 0.97) 55%, rgba(247, 248, 246, 0));
+  }
+  .cta-actions .btn {
+    width: 100%;
+  }
+}
+
+/* ---------------------------- Rail de progression ---------------------------- */
+
+.story-rail {
+  position: absolute;
+  right: clamp(12px, 2vw, 32px);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 14px;
+  pointer-events: auto;
+}
+.story-rail-line {
+  position: absolute;
+  right: 11px;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.28);
+  border-radius: 2px;
+}
+.story-rail-fill {
+  position: absolute;
+  inset: 0;
+  background: var(--white);
+  transform-origin: top;
+  transform: scaleY(var(--p, 0));
+  border-radius: 2px;
+}
+.story-rail ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 34px;
+}
+.story-rail button {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 12px;
+  background: none;
+  border: 0;
+  padding: 2px;
+  color: var(--white);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  min-height: 24px;
+}
+.rail-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  background: rgba(16, 43, 66, 0.6);
+  flex: none;
+  transition: background 0.3s, transform 0.3s;
+}
+.story-rail .is-current .rail-dot {
+  background: var(--white);
+  transform: scale(1.1);
+}
+.rail-label {
+  opacity: 0;
+  transform: translateX(6px);
+  transition: opacity 0.25s, transform 0.25s;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
+  white-space: nowrap;
+}
+.story-rail button:hover .rail-label,
+.story-rail button:focus-visible .rail-label,
+.story-rail .is-current .rail-label {
+  opacity: 1;
+  transform: none;
+}
+.theme-light-film .story-rail {
+  color: var(--blue-deep);
+}
+
+/* ---------------------------- Outils ---------------------------- */
+
+.film-tools {
+  position: absolute;
+  left: clamp(20px, 6vw, 112px);
+  bottom: 28px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  pointer-events: auto;
+}
+.tool-btn {
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  min-height: 40px;
+  padding: 0.45em 1.05em;
+  border-radius: 999px;
+  border: 1.5px solid rgba(255, 255, 255, 0.75);
+  color: var(--white);
+  background: rgba(10, 22, 33, 0.38);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+}
+.tool-btn:hover {
+  background: rgba(10, 22, 33, 0.6);
+}
+.tool-quiet {
+  border-color: transparent;
+  background: transparent;
+  backdrop-filter: none;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.scroll-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 26px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: opacity 0.5s;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+}
+.scroll-hint.is-hidden {
+  opacity: 0;
+}
+.scroll-hint-line {
+  width: 2px;
+  height: 36px;
+  background: linear-gradient(to bottom, var(--white), rgba(255, 255, 255, 0));
+  animation: hint 2.2s ease-in-out infinite;
+  transform-origin: top;
+}
+@keyframes hint {
+  0% {
+    transform: scaleY(0);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+  100% {
+    transform: scaleY(1);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .story-rail {
+    display: none;
+  }
+  .film-tools {
+    left: 16px;
+    right: auto;
+    top: calc(var(--nav-h) + 4px);
+    bottom: auto;
+    gap: 4px;
+  }
+  .tool-btn {
+    min-height: 36px;
+    font-size: 0.8125rem;
+    padding: 0.35em 0.9em;
+  }
+  .scroll-hint {
+    bottom: 22px;
+  }
+}
+
+/* scènes claires (OETH, conclusion) : outils et rail en encre foncée */
+.film-viewport[data-theme='light'] .tool-btn {
+  color: var(--blue-deep);
+  border-color: rgba(16, 43, 66, 0.45);
+  background: rgba(247, 248, 246, 0.7);
+}
+.film-viewport[data-theme='light'] .tool-quiet {
+  background: transparent;
+  border-color: transparent;
+}
+.film-viewport[data-theme='light'] .story-rail button {
+  color: var(--blue-deep);
+}
+.film-viewport[data-theme='light'] .rail-label {
+  text-shadow: none;
+}
+.film-viewport[data-theme='light'] .rail-dot {
+  border-color: rgba(16, 43, 66, 0.6);
+  background: rgba(247, 248, 246, 0.8);
+}
+.film-viewport[data-theme='light'] .story-rail .is-current .rail-dot {
+  background: var(--blue-deep);
+}
+.film-viewport[data-theme='light'] .story-rail-line {
+  background: rgba(16, 43, 66, 0.2);
+}
+.film-viewport[data-theme='light'] .story-rail-fill {
+  background: var(--blue-deep);
+}

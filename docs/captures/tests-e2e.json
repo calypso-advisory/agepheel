@@ -1,0 +1,87 @@
+[
+  {
+    "name": "Film réversible : mêmes images à position égale après allers-retours rapides",
+    "ok": true,
+    "info": "5/5"
+  },
+  {
+    "name": "Ordre de tabulation",
+    "ok": true,
+    "info": "Aller au contenu | CRChangeons de regard | Solutions | Comprendre l’OETH | À propos | Contact | Faire le point | Passer l’introductionPasser | Sans animation | Changer de regard"
+  },
+  {
+    "name": "« Passer l’introduction » amène aux solutions et y place le focus",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "name": "Formulaire vide : erreurs signalées",
+    "ok": true,
+    "info": "7 champs"
+  },
+  {
+    "name": "Formulaire valide : mode démonstration affiché",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "name": "Redimensionnement : bascule en disposition portrait",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "name": "Aucune erreur console",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "name": "prefers-reduced-motion : parcours éditorial statique, un seul H1, 12 scènes",
+    "ok": true,
+    "info": "film=0 h1=1 scènes=12"
+  },
+  {
+    "name": "Aucune erreur console (réduit)",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "name": "Mode film : un seul H1 et récit complet dans le DOM",
+    "ok": true,
+    "info": "h1=1"
+  },
+  {
+    "name": "Page /solutions : rendu et H1 unique",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "name": "Page /comprendre-oeth : rendu et H1 unique",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "name": "Page /entreprises-adaptees-esat : rendu et H1 unique",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "name": "Page /a-propos : rendu et H1 unique",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "name": "Page /contact : rendu et H1 unique",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "name": "Aucune erreur console (pages)",
+    "ok": true,
+    "info": ""
+  },
+  {
+    "name": "Menu mobile : ouverture, fermeture à Échap",
+    "ok": true,
+    "info": ""
+  }
+]

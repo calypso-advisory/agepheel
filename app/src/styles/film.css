@@ -1,0 +1,449 @@
+/* ================================ Film (v3) ================================ */
+/* Scène épinglée. Plein écran vidéo par défaut ; aux interludes, l'image se range dans
+   une « carte » (droite en paysage, haut en portrait) et la typographie prend la colonne. */
+
+.fm {
+  position: relative;
+  height: calc((var(--len) + 1) * 100svh);
+  background: #0e1922;
+}
+.fm-stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+  background: #0e1922;
+  color: var(--white);
+}
+
+.fm-poster,
+.fm-poster img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.fm-stage.is-ready .fm-poster {
+  visibility: hidden;
+}
+
+.fm-paper {
+  position: absolute;
+  inset: 0;
+  background: var(--paper);
+  opacity: 0;
+  visibility: hidden;
+  will-change: opacity;
+}
+
+.fm-mask {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--sw);
+  height: var(--sh);
+  overflow: hidden;
+  transform-origin: 0 0;
+  will-change: transform, opacity;
+}
+.fm-canvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--sw);
+  height: var(--sh);
+  transform-origin: 0 0;
+  will-change: transform;
+  display: block;
+}
+.fm-fill {
+  position: absolute;
+  inset: 0;
+  background: var(--blue);
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* voile bas pour la lisibilité des textes posés sur l'image */
+.fm-scrim {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 62%;
+  background: linear-gradient(to top, rgba(8, 18, 27, 0.78), rgba(8, 18, 27, 0.35) 45%, rgba(8, 18, 27, 0));
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* ------------------------------ Graphique sur l'écran ------------------------------ */
+.fm-chart {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.fm-bar {
+  position: absolute;
+  background: var(--blue);
+  transform-origin: bottom;
+  transform: scaleY(0);
+  border-radius: 3px 3px 0 0;
+}
+.fm-bar:nth-child(1) {
+  background: #b9d7df;
+}
+.fm-bar:nth-child(2) {
+  background: #8fb8c9;
+}
+.fm-bar:nth-child(3) {
+  background: #5f93b0;
+}
+.fm-bar:nth-child(4) {
+  background: #2f6689;
+}
+.fm-bar span {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  margin-top: 10px;
+  text-align: center;
+  font-size: clamp(0.7rem, 0.55rem + 0.5vw, 0.95rem);
+  font-weight: 700;
+  color: var(--blue-deep);
+  white-space: nowrap;
+}
+
+/* ------------------------------ Textes ------------------------------ */
+.fm-texts {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.fm-text {
+  position: absolute;
+  margin: 0;
+  font-weight: 750;
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+  text-wrap: balance;
+  opacity: 0;
+  visibility: hidden;
+  will-change: opacity, transform;
+}
+.fm-text.size-xl {
+  font-size: clamp(2.3rem, 1rem + 4.6vw, 6.4rem);
+}
+.fm-text.size-l {
+  font-size: clamp(1.9rem, 1rem + 3.2vw, 4.6rem);
+  font-weight: 650;
+}
+.fm-text.pos-over {
+  left: clamp(20px, 6vw, 112px);
+  right: clamp(20px, 30vw, 520px);
+  bottom: clamp(70px, 12vh, 140px);
+  color: var(--white);
+  text-shadow: 0 2px 30px rgba(0, 0, 0, 0.35);
+}
+.fm-text.pos-col {
+  left: var(--tx);
+  top: calc(var(--ty) + var(--th) * 0.3);
+  width: var(--tw);
+  color: var(--blue-deep);
+}
+.fm-text.pos-col.size-xl {
+  font-size: clamp(2rem, 1rem + 3vw, 4.8rem);
+}
+.fm-text.pos-center {
+  translate: none;
+  left: 6vw;
+  right: 6vw;
+  top: 50%;
+  margin-top: -0.6em;
+  text-align: center;
+  color: var(--white);
+  text-shadow: 0 4px 40px rgba(0, 0, 0, 0.5);
+}
+[data-layout='port'] .fm-text.pos-col {
+  top: var(--ty);
+}
+[data-layout='port'] .fm-text.pos-col.size-xl,
+[data-layout='port'] .fm-text.pos-col.size-l {
+  font-size: clamp(1.7rem, 1rem + 4.2vw, 3rem);
+}
+[data-layout='port'] .fm-text.pos-over {
+  right: 20px;
+  bottom: 84px;
+}
+
+/* ------------------------------ OETH ------------------------------ */
+.fm-oeth {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.fm-o {
+  position: absolute;
+  left: clamp(20px, 8vw, 150px);
+  right: clamp(20px, 20vw, 360px);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink);
+  opacity: 0;
+  visibility: hidden;
+}
+.fm-o-fig {
+  margin: 0;
+  font-size: clamp(6rem, 3rem + 16vw, 19rem);
+  font-weight: 800;
+  line-height: 0.85;
+  letter-spacing: -0.06em;
+  color: var(--blue);
+}
+.fm-o-text {
+  margin: 0.5em 0 0;
+  font-size: clamp(1.25rem, 0.9rem + 1.5vw, 2.3rem);
+  font-weight: 650;
+  line-height: 1.2;
+  color: var(--blue-deep);
+  max-width: 28ch;
+}
+.fm-o-note {
+  margin-top: 1.4em;
+  font-size: 0.85rem;
+  color: var(--muted);
+  max-width: 70ch;
+  line-height: 1.5;
+}
+.fm-o-q {
+  margin: 0;
+  font-size: clamp(2.3rem, 1.2rem + 4.4vw, 6rem);
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  color: var(--blue-deep);
+  max-width: 15ch;
+}
+.fm-people {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 1.4em;
+  max-width: 520px;
+}
+.fm-person {
+  width: clamp(14px, 1.6vw, 22px);
+  height: auto;
+  fill: var(--blue);
+}
+.fm-dots {
+  display: grid;
+  grid-template-columns: repeat(25, 1fr);
+  gap: 5px;
+  margin-top: 1.4em;
+  max-width: 520px;
+}
+.fm-dot {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #d5dde0;
+}
+.fm-dot.is-on {
+  background: var(--blue);
+  opacity: 0;
+}
+[data-layout='port'] .fm-o {
+  right: 20px;
+  top: 46%;
+}
+
+/* ------------------------------ Conclusion ------------------------------ */
+.fm-cta {
+  position: absolute;
+  left: var(--tx);
+  top: calc(var(--ty) + var(--th) * 0.22);
+  width: var(--tw);
+  color: var(--blue-deep);
+  opacity: 0;
+  visibility: hidden;
+}
+.fm-cta h2 {
+  font-size: clamp(2rem, 1.1rem + 2.8vw, 4rem);
+  color: var(--blue-deep);
+  margin-bottom: 0.4em;
+}
+.fm-cta p {
+  color: #2b3a46;
+  font-size: clamp(1rem, 0.9rem + 0.4vw, 1.25rem);
+}
+[data-layout='port'] .fm-cta {
+  top: var(--ty);
+}
+[data-layout='port'] .fm-cta h2 {
+  font-size: clamp(1.5rem, 1rem + 3.4vw, 2.4rem);
+}
+[data-layout='port'] .fm-cta p {
+  display: none;
+}
+[data-layout='port'] .fm-cta .btn {
+  width: 100%;
+}
+
+/* ------------------------------ Navigation du récit ------------------------------ */
+.fm-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--white);
+}
+.fm-hint-line {
+  width: 2px;
+  height: 30px;
+  background: var(--white);
+  transform-origin: top;
+  animation: act-hint 2s ease-in-out infinite;
+}
+.fm-nav {
+  position: absolute;
+  right: clamp(16px, 2.4vw, 40px);
+  bottom: 24px;
+  display: grid;
+  gap: 10px;
+  justify-items: end;
+}
+.fm-nav ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 4px;
+}
+.fm-nav button {
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  min-height: 32px;
+  padding: 0.3em 0.8em;
+  border-radius: 999px;
+  border: 0;
+  background: rgba(10, 22, 33, 0.35);
+  color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+}
+.fm-nav button.is-current {
+  background: var(--white);
+  color: var(--blue-deep);
+}
+.fm-rail {
+  width: 100%;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.25);
+}
+.fm-rail-fill {
+  display: block;
+  height: 100%;
+  background: var(--white);
+  transform-origin: left;
+  transform: scaleX(0);
+}
+.fm-tools {
+  position: absolute;
+  left: clamp(16px, 2.4vw, 40px);
+  bottom: 24px;
+  display: flex;
+  gap: 6px;
+}
+.fm-btn {
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  min-height: 36px;
+  padding: 0.35em 0.95em;
+  border-radius: 999px;
+  border: 1.5px solid rgba(255, 255, 255, 0.7);
+  background: rgba(10, 22, 33, 0.3);
+  color: var(--white);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+}
+.fm-btn-quiet {
+  border-color: transparent;
+  background: transparent;
+  backdrop-filter: none;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+[data-tone='light'] .fm-btn {
+  color: var(--blue-deep);
+  border-color: rgba(16, 43, 66, 0.45);
+  background: rgba(247, 248, 246, 0.7);
+}
+[data-tone='light'] .fm-btn-quiet {
+  background: transparent;
+  border-color: transparent;
+}
+[data-tone='light'] .fm-nav button {
+  background: rgba(16, 43, 66, 0.08);
+  color: var(--blue-deep);
+}
+[data-tone='light'] .fm-nav button.is-current {
+  background: var(--blue-deep);
+  color: var(--white);
+}
+[data-tone='light'] .fm-rail {
+  background: rgba(16, 43, 66, 0.15);
+}
+[data-tone='light'] .fm-rail-fill {
+  background: var(--blue-deep);
+}
+[data-tone='light'] .fm-hint {
+  color: var(--blue-deep);
+}
+
+@media (max-width: 760px) {
+  .fm-nav ol {
+    display: none;
+  }
+  .fm-nav {
+    left: 16px;
+    right: 16px;
+    bottom: 12px;
+  }
+  .fm-tools {
+    top: calc(var(--nav-h) + 4px);
+    bottom: auto;
+    left: 12px;
+  }
+  .fm-hint {
+    bottom: 30px;
+  }
+}
+
+@keyframes act-hint {
+  0% {
+    transform: scaleY(0);
+  }
+  60% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleY(1);
+    opacity: 0;
+  }
+}
