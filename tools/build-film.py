@@ -10,6 +10,8 @@ Les images d'une variante sont concaténées dans un seul fichier <clip>-<varian
 manifest.json donne les bornes de chaque image.
 
 usage : build-film.py <dossier des mp4> <dossier de sortie> [focal.json]
+  ONLY=c00,c05 : ne reconvertit que ces clips et complète le manifest existant.
+L'affiche (poster-d/m.webp) vient de la première image du clip d'ouverture (POSTER, c00 par défaut).
 """
 import json
 import os
@@ -42,6 +44,11 @@ def main():
     os.makedirs(out, exist_ok=True)
     manifest = {"fps": FPS, "variants": {"d": {"w": DW, "h": 0}, "m": {"w": MW, "h": MH}}, "clips": {}}
     clips = sorted(f[:-4] for f in os.listdir(src) if f.endswith('.mp4') and f.startswith('c'))
+    only = [c for c in os.environ.get('ONLY', '').split(',') if c]
+    poster = os.environ.get('POSTER', 'c00')
+    if only:
+        manifest = json.load(open(f'{out}/manifest.json'))
+        clips = [c for c in clips if c in only]
     for cid in clips:
         with tempfile.TemporaryDirectory() as tmp:
             subprocess.run(['ffmpeg', '-loglevel', 'error', '-y', '-i', f'{src}/{cid}.mp4', '-vf', f'fps={FPS}', f'{tmp}/%04d.png'], check=True)
@@ -69,11 +76,12 @@ def main():
                     m.save(p, 'WEBP', quality=QUALITY, method=5)
                     fm.write(open(p, 'rb').read())
                     entry['m'].append(fm.tell())
-                    if cid == 'c01' and i == 0:
+                    if cid == poster and i == 0:
                         d.save(f'{out}/poster-d.webp', 'WEBP', quality=72)
                         m.save(f'{out}/poster-m.webp', 'WEBP', quality=72)
             manifest['clips'][cid] = entry
             print(cid, n, 'images', round(entry['d'][-1] / 1e6, 2), 'Mo bureau', round(entry['m'][-1] / 1e6, 2), 'Mo mobile', flush=True)
+    manifest['clips'] = dict(sorted(manifest['clips'].items()))
     json.dump(manifest, open(f'{out}/manifest.json', 'w'))
 
 

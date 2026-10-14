@@ -61,6 +61,12 @@ export const OETH = {
   },
 }
 
+/** Accueil : ce que voit le visiteur avant de faire défiler. */
+export const HERO = {
+  title: 'Dans chaque entreprise, il y a des talents.',
+  text: 'Recrutement, intégration, obligations OETH : nous aidons les entreprises à révéler ces talents et à passer à l’action.',
+}
+
 export const CTA = {
   title: 'Et si nous faisions le point sur votre entreprise ?',
   text: 'Découvrez votre situation, comprenez vos obligations et identifiez les solutions qui peuvent faire la différence.',

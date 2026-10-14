@@ -46,6 +46,8 @@ export interface FilmState {
   oeth: { s1: number; s2: number; s3: number; people: number; dots: number }
   cta: number
   hint: number
+  /** bloc d'accueil (titre, phrase, bouton) */
+  hero: number
 }
 
 export const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v))
@@ -124,7 +126,7 @@ export function evaluate(p: number, L: Layout): FilmState {
   const st: FilmState = {
     beat,
     act: BEATS[bi].act,
-    clip: { id: 'c01', t: 0 },
+    clip: { id: 'c00', t: 0 },
     frame: { R: S, C: S, opacity: 1, fill: 0 },
     paper: 0,
     scrim: 0,
@@ -133,6 +135,7 @@ export function evaluate(p: number, L: Layout): FilmState {
     oeth: { s1: 0, s2: 0, s3: 0, people: 0, dots: 0 },
     cta: 0,
     hint: 0,
+    hero: 0,
   }
   for (const t of TEXTS) st.texts[t.id] = 0
   const full = (id: string, t: number) => {
@@ -148,10 +151,15 @@ export function evaluate(p: number, L: Layout): FilmState {
 
   switch (beat) {
     case 'open': {
-      full('c01', seg(u, 0.08, 1))
-      st.texts.open = 1 - seg(u, 0.42, 0.56)
-      st.scrim = 1
-      st.hint = 1 - seg(u, 0.01, 0.08)
+      // plan d'équipe immobile à l'arrivée, avec titre, phrase et bouton ; puis la caméra plonge jusque dans ses yeux
+      full('c00', seg(u, 0.1, 1))
+      st.hero = 1 - seg(u, 0.03, 0.16)
+      st.scrim = 1 - seg(u, 0.12, 0.3)
+      st.hint = 1 - seg(u, 0.01, 0.06)
+      break
+    }
+    case 'reveal': {
+      full('c01', u)
       break
     }
     case 'orbit': {

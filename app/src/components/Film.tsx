@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { CTA, OETH } from '../content/site'
+import { CTA, HERO, OETH } from '../content/site'
 import { FrameSequence, type SeqIndex } from '../film/sequence'
 import { beatStart, chartBarRect, computeLayout, evaluate, TOTAL, type FilmState, type Layout, type Rect } from '../film/film'
 import { ACTS, BEATS, CHART_BARS, CLIPS, TEXTS } from '../film/storyboard'
@@ -56,6 +56,7 @@ export function Film({ onRequestStatic, onFail }: Props) {
     const bars = Array.from(stage.querySelectorAll<HTMLElement>('.fm-bar'))
     const cta = q('.fm-cta')
     const hint = q('.fm-hint')
+    const hero = q('.fm-hero')
     const rail = q('.fm-rail-fill')
     const oeth = {
       s1: q('[data-o="s1"]'),
@@ -253,6 +254,10 @@ export function Film({ onRequestStatic, onFail }: Props) {
       if (st.cta < 0.5) cta.setAttribute('inert', '')
       else cta.removeAttribute('inert')
       op(hint, st.hint)
+      op(hero, st.hero)
+      set(hero, 'transform', `translate3d(0,${((1 - st.hero) * -24).toFixed(1)}px,0)`)
+      if (st.hero < 0.5) hero.setAttribute('inert', '')
+      else hero.removeAttribute('inert')
       set(rail, 'transform', `scaleX(${p.toFixed(4)})`)
       stage.dataset.tone = st.paper > 0.5 ? 'light' : 'dark'
       if (st.act !== curAct) {
@@ -350,6 +355,14 @@ export function Film({ onRequestStatic, onFail }: Props) {
           <div className="fm-fill" />
         </div>
         <div className="fm-scrim" aria-hidden="true" />
+
+        <div className="fm-hero">
+          <h1>{HERO.title}</h1>
+          <p>{HERO.text}</p>
+          <a className="btn btn-primary" href="#contact" onClick={toContact}>
+            {CTA.primary}
+          </a>
+        </div>
 
         <div className="fm-texts">
           {TEXTS.map((t) =>

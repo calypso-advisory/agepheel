@@ -7,7 +7,8 @@
  *  - où se trouve le cadre vidéo : plein écran, carte, fenêtre étroite… ;
  *  - quels textes, quelles surfaces graphiques sont visibles.
  *
- * Fil conducteur : le regard. On sort des yeux d'une salariée, on entre dans ceux d'une autre.
+ * Fil conducteur : le regard. On part de l'équipe, on entre dans les yeux d'une salariée, on en ressort ;
+ * à la fin, on entre dans les yeux d'une salariée, on entre dans ceux d'une autre.
  */
 
 export interface ClipDef {
@@ -19,6 +20,7 @@ export interface ClipDef {
 }
 
 export const CLIPS: ClipDef[] = [
+  { id: 'c00', label: 'Une salariée en fauteuil roulant présente à ses collègues attentifs ; la caméra s’approche lentement jusqu’à ses yeux.', focal: [[0, 0.6], [0.5, 0.62], [0.7, 0.55], [1, 0.5]] },
   { id: 'c01', label: 'Très gros plan sur les yeux d’une salariée, puis la caméra recule et révèle son sourire pendant qu’elle présente.', focal: [[0, 0.5], [1, 0.55]] },
   { id: 'c02', label: 'La caméra tourne autour d’elle et révèle ses collègues qui l’écoutent.', focal: [[0, 0.55], [1, 0.62]] },
   { id: 'c03', label: 'La caméra avance vers l’écran de présentation jusqu’à ce qu’il remplisse l’image.', focal: [[0, 0.62], [1, 0.5]] },
@@ -44,7 +46,6 @@ export interface FilmText {
 }
 
 export const TEXTS: FilmText[] = [
-  { id: 'open', text: 'Dans chaque entreprise, il y a des talents.', pos: 'over', size: 'xl', h1: true },
   { id: 'regard', text: 'Certains méritent simplement qu’on les regarde autrement.', short: 'Regardons autrement.', pos: 'over', size: 'l' },
   { id: 'def', text: 'Le handicap ne définit pas un talent.', pos: 'over', size: 'l' },
   { id: 'comp', text: 'Ce sont ses compétences qui font la différence.', pos: 'col', size: 'xl' },
@@ -69,7 +70,8 @@ export const TEXTS: FilmText[] = [
 export const PACE = 0.72
 
 export const BEATS = [
-  { id: 'open', len: 2.0, act: 1 },
+  { id: 'open', len: 2.2, act: 1 },
+  { id: 'reveal', len: 1.6, act: 1 },
   { id: 'orbit', len: 2.0, act: 1 },
   { id: 'screen', len: 1.8, act: 1 },
   { id: 'chart', len: 2.8, act: 1 },
