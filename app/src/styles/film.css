@@ -270,8 +270,9 @@
 }
 .fm-o {
   position: absolute;
-  left: clamp(20px, 8vw, 150px);
-  right: clamp(20px, 20vw, 360px);
+  /* colonne de gauche : l'image occupe la carte de droite */
+  left: var(--tx);
+  width: var(--tw);
   top: 50%;
   transform: translateY(-50%);
   color: var(--ink);
@@ -280,7 +281,7 @@
 }
 .fm-o-fig {
   margin: 0;
-  font-size: clamp(6rem, 3rem + 16vw, 19rem);
+  font-size: clamp(5rem, 2rem + 10vw, 13rem);
   font-weight: 800;
   line-height: 0.85;
   letter-spacing: -0.06em;
@@ -339,8 +340,12 @@
   opacity: 0;
 }
 [data-layout='port'] .fm-o {
+  left: 20px;
   right: 20px;
-  top: 46%;
+  width: auto;
+  /* sous la bande d'image (30 % de la hauteur utile, cf. film.ts) */
+  top: calc(var(--cy) + (100svh - var(--cy)) * 0.3 + 24px);
+  transform: none;
 }
 
 /* ------------------------------ Conclusion ------------------------------ */

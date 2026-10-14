@@ -16,6 +16,7 @@ export interface SeqIndex {
 export class FrameSequence {
   private blobs: Blob[] | null = null
   private loadP: Promise<void> | null = null
+  private ctrl: AbortController | null = null
   private cache = new Map<number, ImageBitmap>()
   private pending = new Map<number, Promise<void>>()
   private readonly url: string
@@ -41,7 +42,8 @@ export class FrameSequence {
 
   load(): Promise<void> {
     if (this.loadP) return this.loadP
-    this.loadP = fetch(this.url)
+    this.ctrl = new AbortController()
+    this.loadP = fetch(this.url, { signal: this.ctrl.signal })
       .then((r) => {
         if (!r.ok) throw new Error(`${this.url} : ${r.status}`)
         return r.arrayBuffer()
@@ -54,10 +56,24 @@ export class FrameSequence {
         this.onDecoded()
       })
       .catch((e) => {
+        if ((e as Error)?.name === 'AbortError') return
         this.failed = true
         console.warn('Séquence indisponible', e)
       })
     return this.loadP
+  }
+
+  /** Téléchargement en cours ? */
+  get loading() {
+    return this.loadP !== null && this.blobs === null
+  }
+
+  /** Abandonne un téléchargement devenu inutile (le visiteur est parti ailleurs dans le film). */
+  abort() {
+    if (!this.loading) return
+    this.ctrl?.abort()
+    this.ctrl = null
+    this.loadP = null
   }
 
   /** Demande le décodage d'une image (sans attendre). */
@@ -88,6 +104,11 @@ export class FrameSequence {
         this.pending.delete(i)
       })
     this.pending.set(i, p)
+  }
+
+  /** L'image i est-elle décodée ? */
+  has(i: number) {
+    return this.cache.has(Math.max(0, Math.min(this.count - 1, i)))
   }
 
   /** Image décodée la plus proche de i (ou null). */

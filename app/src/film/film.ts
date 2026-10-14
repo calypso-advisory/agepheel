@@ -172,7 +172,7 @@ export function evaluate(p: number, L: Layout): FilmState {
       full('c03', seg(u, 0, 0.92))
       // dans la salle, la phrase est posée sur l'image ; quand l'écran remplit le cadre, elle s'y affiche comme sa diapositive
       st.texts.def = txt(u, 0.06, 0.18, 0.4, 0.5)
-      st.texts.slide = out(seg(u, 0.58, 0.8))
+      st.texts.slide = out(seg(u, 0.48, 0.66))
       st.scrim = 1 - seg(u, 0.42, 0.6)
       break
     }
@@ -182,10 +182,10 @@ export function evaluate(p: number, L: Layout): FilmState {
       st.paper = seg(u, 0, 0.08)
       st.frame.opacity = 1 - seg(u, 0.02, 0.1)
       // la diapositive cède la place au graphique, qui commence à se dessiner aussitôt
-      st.texts.slide = 1 - seg(u, 0.0, 0.08)
+      st.texts.slide = 1 - seg(u, 0.07, 0.13)
       const draw = io(seg(u, 0.04, 0.36))
       st.chart = { draw, opacity: 1 - seg(u, 0.72, 0.86) }
-      st.texts.comp = txt(u, 0.1, 0.2, 0.36, 0.43)
+      st.texts.comp = txt(u, 0.13, 0.2, 0.36, 0.43)
       st.texts.avance = txt(u, 0.44, 0.52, 0.64, 0.7)
       // la barre « Engagement » devient une fenêtre sur l'atelier
       const grow = io(seg(u, 0.7, 0.99))
@@ -219,9 +219,25 @@ export function evaluate(p: number, L: Layout): FilmState {
       st.scrim = 1
       break
     }
+    case 'florist': {
+      // glissé : l'entrepôt sort par la gauche, la boutique entre par la droite (comme un panoramique filé)
+      const k = io(seg(u, 0, 0.2))
+      st.clip = { id: 'f1', t: seg(u, 0.12, 1) }
+      if (k < 1) {
+        const dx = L.land ? S.w : 0
+        const dy = L.land ? 0 : S.h
+        st.panels = [
+          { id: 'c05', t: 1, r: { x: -k * dx, y: -k * dy, w: S.w, h: S.h } },
+          { id: 'f1', t: 0, r: { x: (1 - k) * dx, y: (1 - k) * dy, w: S.w, h: S.h } },
+        ]
+      }
+      st.texts.signe = txt(u, 0.3, 0.42, 0.72, 0.84)
+      st.scrim = seg(u, 0.2, 0.3) * (1 - seg(u, 0.84, 0.95))
+      break
+    }
     case 'split': {
       // écran partagé : le plan se range à gauche, le magasin et le bureau entrent ; puis le bureau prend tout l'écran
-      st.clip = { id: 'c05', t: 1 }
+      st.clip = { id: 'f1', t: 1 }
       st.frame = { R: S, C: S, opacity: 1, fill: 0 }
       const g = Math.max(4, Math.round(L.G / 4))
       const n = 3
@@ -243,15 +259,15 @@ export function evaluate(p: number, L: Layout): FilmState {
         return L.land ? { ...r, x: r.x - S.w } : { ...r, y: r.y - S.h }
       }
       let p0 = lerpRect(S, slot(0), open)
-      let p1 = lerpRect(off(1), slot(1), io(seg(u, 0.06, 0.32)))
-      let p2 = lerpRect(off(2), slot(2), io(seg(u, 0.12, 0.38)))
+      let p1 = lerpRect(off(1), slot(1), io(seg(u, 0.02, 0.28)))
+      let p2 = lerpRect(off(2), slot(2), io(seg(u, 0.05, 0.31)))
       if (grow > 0) {
         p0 = lerpRect(slot(0), out(0), grow)
         p1 = lerpRect(slot(1), out(1), grow)
         p2 = lerpRect(slot(2), S, grow)
       }
       st.panels = [
-        { id: 'c05', t: 1, r: p0 },
+        { id: 'f1', t: 1, r: p0 },
         { id: 'r1', t: seg(u, 0.1, 0.9), r: p1 },
         { id: 'o1', t: 0, r: p2 },
       ]
@@ -297,29 +313,29 @@ export function evaluate(p: number, L: Layout): FilmState {
       break
     }
     case 'oeth': {
-      // le film se range en vignette et laisse place aux chiffres
-      st.clip = { id: 'c08', t: 1 }
+      // le film se range dans la moitié droite (le haut en portrait) ; à chaque chiffre, une autre personne, un autre métier
       st.paper = 1
       const away = io(seg(u, 0, 0.13))
-      const small: Rect = L.land
-        ? { x: L.W - L.G - L.W * 0.12, y: L.H - L.G - L.W * 0.12 * 0.5625, w: L.W * 0.12, h: L.W * 0.12 * 0.5625 }
-        : { x: L.W - L.G - L.W * 0.3, y: L.H - L.G - L.W * 0.3 * 0.5625, w: L.W * 0.3, h: L.W * 0.3 * 0.5625 }
-      const R = lerpRect(S, small, away)
-      st.frame = { R, C: R, opacity: 1 - seg(u, 0.09, 0.15), fill: 0 }
+      const band: Rect = L.land ? card : { x: L.G, y: card.y, w: L.W - 2 * L.G, h: Math.round((L.H - card.y) * 0.3) }
+      const R = lerpRect(S, band, away)
+      st.frame = { R, C: R, opacity: 1, fill: 0 }
+      st.clip = u < 0.44 ? { id: 'c08', t: 1 } : u < 0.74 ? { id: 'p1', t: 0.2 } : { id: 'c02', t: 1 }
       st.oeth.s1 = txt(u, 0.11, 0.2, 0.38, 0.44)
       st.oeth.people = seg(u, 0.15, 0.34)
       st.oeth.s2 = txt(u, 0.44, 0.52, 0.68, 0.74)
       st.oeth.dots = seg(u, 0.48, 0.64)
       st.oeth.s3 = txt(u, 0.75, 0.83, 0.94, 1)
+      // la vignette s'efface juste avant le mot géant
+      st.frame.opacity = 1 - seg(u, 0.94, 1)
       break
     }
     case 'word': {
       // lettres découpées : le mot géant laisse voir le dernier plan ; il grandit jusqu'à ce que l'image remplisse l'écran
       full('c09', 0)
       st.paper = 1 - seg(u, 0.86, 0.96)
-      const k = Math.pow(seg(u, 0.32, 0.94), 2.6)
+      const k = Math.pow(seg(u, 0.28, 0.66), 2.4)
       // le calque papier reste opaque ; c'est l'image qui apparaît dans les lettres, puis le calque s'efface quand il a tout ouvert
-      st.knock = { scale: k, opacity: 1 - seg(u, 0.62, 0.8) }
+      st.knock = { scale: k, opacity: 1 - seg(u, 0.44, 0.58) }
       st.frame.opacity = out(seg(u, 0, 0.18))
       break
     }

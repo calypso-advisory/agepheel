@@ -14,18 +14,25 @@ Neuf clips Runway (Kling 3.0 Pro, 5 s chacun, image de départ et image d’arri
 | Bras bionique | p1 : plan large puis **insert** (coupe sèche) sur sa main et le tournevis rouge | « Des compétences différentes. » / « Une même exigence… » |
 | Atelier | **raccord dans l’axe** (match cut) : même cadre, même tournevis, une autre main — c04 | « Chaque métier a ses talents. » |
 | Logistique | c05 : de l’atelier à l’entrepôt (salarié en fauteuil) | « Chaque talent a sa place. » |
-| Écran partagé | **triptyque** logistique / magasin (r1, prothèse de jambe) / bureau (o1) ; le bureau prend l’écran | « Rien ne se construit seul. » / « La réussite est collective. » |
+| Fleuriste | **glissé** : l’entrepôt sort, la boutique entre ; f1 : elle s’exprime en langue des signes, une tablette traduit | « Chacun s’exprime à sa façon. » |
+| Écran partagé | **triptyque** fleuriste / magasin (r1, prothèse de jambe) / bureau (o1) ; le bureau prend l’écran | « Rien ne se construit seul. » / « La réussite est collective. » |
 | Bureau | o1 : salarié avec implant auditif ; **volet par amorce** (un pilier passe devant l’objectif et cache la coupe) | « L’inclusion ne s’improvise pas. » |
 | Réunion | c06 | « Elle se construit, ensemble. » |
 | La grue | c07 : montée jusqu’à la vue du dessus | Identifier / Construire / Accompagner |
 | Liaison | c07b : redescente, la plante passe devant l’objectif | « Des engagements concrets. » / « Des résultats… » |
 | La paroi | c08 | « Chaque action fait avancer l’entreprise. » |
-| OETH | Le film se range en vignette ; 20 silhouettes ; 6 points sur 100 ; la question | chiffres OETH |
+| OETH | Le film se range dans la moitié droite (le haut en portrait), une autre personne à chaque chiffre | chiffres OETH |
 | Le mot | **lettres découpées** : « REGARD » laisse voir l’image, grandit jusqu’à l’ouvrir en plein écran | — |
 | Les yeux | c09 : plongée jusque dans ses yeux | — |
 | Conclusion | **fermeture à l’iris** : le cercle se pose à côté du titre et des boutons | CTA |
 
 Longueur : ≈ 29 hauteurs d’écran (réglage `PACE` dans `src/film/storyboard.ts`).
+
+## Chargement
+
+- Paquets nommés par empreinte de contenu (`tools/finalize-media.py`) : un clip régénéré change d’adresse, aucun cache ne ressort l’ancien.
+- Pour chaque clip, 3 images fixes légères (début, milieu, fin) chargées d’abord, en partant du plan affiché : jamais d’écran noir, même sur connexion lente ou en sautant dans le film.
+- Les paquets vidéo des plans visibles passent en premier ; ceux qu’on a quittés sont abandonnés.
 
 ## Production
 

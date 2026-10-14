@@ -5,7 +5,7 @@ Site vitrine (Vite + React + TypeScript) dans `app/`. Déployé sur Vercel (Root
 ## Le film (page d'accueil)
 
 - Le récit est un film piloté par le scroll : `app/src/film/` (storyboard, moteur pur `film.ts`, chargement des séquences `sequence.ts`) et `app/src/components/Film.tsx`.
-- Les images viennent de clips Runway convertis en paquets (`app/public/media/film/<clip>-<d|m>.bin` + `manifest.json`) par `tools/build-film.py`. « d » = bureau 1440 px, « m » = portrait 608×1080 recadré sur le sujet (`tools/focal.json`).
+- Les images viennent de clips Runway convertis en paquets par `tools/build-film.py`, puis `tools/finalize-media.py` (noms versionnés `<clip>-<d|m>.<empreinte>.bin`, images fixes de secours `.s.webp`, version de l'affiche). Toujours lancer les deux, dans cet ordre. « d » = bureau 1440 px, « m » = portrait 608×1080 recadré sur le sujet (`tools/focal.json`).
 - Le moteur n'écrit que `transform` et `opacity` et dessine dans un seul canvas. Ne pas introduire de re-rendu React par image, de lissage du scroll, de `clip-path` ou de filtres animés : c'est ce qui garantit la fluidité sur iPhone.
 - Transitions disponibles dans le moteur (toutes en canvas ou transform) : volet vertical (`clipB`), écran partagé (`panels`), lettres découpées (`knock`, calque `.fm-knock`), iris (`iris`), fenêtre/carte (rectangles R et C). Les coupes franches se font en changeant de clip d'un temps à l'autre.
 - Les longueurs de scroll : `BEATS` et `PACE` dans `app/src/film/storyboard.ts`. Les textes : `TEXTS` dans le même fichier.

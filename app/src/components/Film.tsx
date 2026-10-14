@@ -4,6 +4,7 @@ import { FrameSequence, type SeqIndex } from '../film/sequence'
 import { beatStart, chartBarRect, computeLayout, evaluate, TOTAL, type FilmState, type Layout, type Rect } from '../film/film'
 import { ACTS, BEATS, CHART_BARS, CLIPS, KNOCKOUT_WORD, TEXTS } from '../film/storyboard'
 import { useTheme } from './themeContext'
+import { POSTER_V } from '../film/posters'
 
 const base = import.meta.env.BASE_URL
 const MEDIA = `${base}media/film/`
@@ -12,7 +13,19 @@ interface Manifest {
   /** extension des paquets (« bin » par défaut ; « webp » pour les hébergements qui filtrent les types) */
   ext?: string
   variants: Record<'d' | 'm', { w: number; h: number }>
-  clips: Record<string, { n: number; d: number[]; m: number[] }>
+  clips: Record<
+    string,
+    {
+      n: number
+      d: number[]
+      m: number[]
+      /** noms de fichiers versionnés par empreinte (tools/finalize-media.py) */
+      files?: Record<'d' | 'm', string>
+      /** planche d'images fixes (début, milieu, fin) affichée tant que le paquet n'est pas là */
+      stills?: Record<'d' | 'm', string>
+      stillsAt?: number[]
+    }
+  >
 }
 
 interface Props {
@@ -82,6 +95,7 @@ export function Film({ onRequestStatic, onFail }: Props) {
     let dir = 1
     let lastDrawKey = ''
     let destroyed = false
+    let curClip = CLIP_ORDER[0]
     const cache = new Map<HTMLElement, Record<string, string>>()
     const set = (el: HTMLElement, prop: 'transform' | 'opacity' | 'visibility', v: string) => {
       let c = cache.get(el)
@@ -99,13 +113,54 @@ export function Film({ onRequestStatic, onFail }: Props) {
       if (!manifest) return
       for (const s of seqs.values()) s.release()
       seqs = new Map()
+      for (const bm of stills.values()) bm?.close()
+      stills = new Map()
+      stillQueue = []
+      stillBusy = false
       const v = manifest.variants[variant]
       for (const id of CLIP_ORDER) {
         const c = manifest.clips[id]
         if (!c) continue
         const index: SeqIndex = { offsets: c[variant], w: v.w, h: v.h }
-        seqs.set(id, new FrameSequence(`${MEDIA}${id}-${variant}.${manifest.ext ?? 'bin'}`, index, L.land ? 14 : 10, () => schedule(true)))
+        const file = c.files?.[variant] ?? `${id}-${variant}.${manifest.ext ?? 'bin'}`
+        seqs.set(id, new FrameSequence(`${MEDIA}${file}`, index, L.land ? 14 : 10, () => schedule(true)))
       }
+      queueStills(curClip)
+    }
+
+    /** images fixes de secours : chargées une à une, en commençant par le clip affiché */
+    let stills = new Map<string, ImageBitmap | null>()
+    let stillQueue: string[] = []
+    let stillBusy = false
+    const pumpStills = () => {
+      if (stillBusy || !manifest) return
+      const id = stillQueue.shift()
+      if (!id) return
+      const c = manifest.clips[id]
+      const file = c?.stills?.[variant]
+      if (!file || stills.has(id)) return pumpStills()
+      stillBusy = true
+      stills.set(id, null)
+      const v = variant
+      fetch(`${MEDIA}${file}`)
+        .then((r) => (r.ok ? r.blob() : Promise.reject(new Error(file))))
+        .then((b) => createImageBitmap(b))
+        .then((bm) => {
+          if (v === variant) stills.set(id, bm)
+          else bm.close()
+          schedule(true)
+        })
+        .catch(() => stills.delete(id))
+        .finally(() => {
+          stillBusy = false
+          pumpStills()
+        })
+    }
+    const queueStills = (fromId: string) => {
+      const i = Math.max(0, CLIP_ORDER.indexOf(fromId))
+      // ordre : le clip affiché, puis les suivants, puis les précédents
+      stillQueue = [...CLIP_ORDER.slice(i), ...CLIP_ORDER.slice(0, i).reverse()].filter((id) => !stills.has(id))
+      pumpStills()
     }
 
     const layoutChart = () => {
@@ -153,26 +208,49 @@ export function Film({ onRequestStatic, onFail }: Props) {
      * dessine l'image du clip, cadrée « cover » dans la zone C (coordonnées du canvas) ;
      * dst : sous-rectangle de C (écran partagé), clipTop : volet vertical
      */
-    const drawClip = (id: string, t: number, C: Rect, clipTop?: number, dst?: Rect) => {
+    /** résultat : 2 = image exacte, 1 = image approchée ou image fixe de secours, 0 = rien */
+    const drawClip = (id: string, t: number, C: Rect, clipTop?: number, dst?: Rect): 0 | 1 | 2 => {
       const s = seqs.get(id)
-      if (!s) return false
-      if (!s.loaded) {
-        void s.load()
-        return false
+      if (!s) return 0
+      let img: CanvasImageSource | null = null
+      let sx = 0
+      let sy = 0
+      let sw = 0
+      let sh = 0
+      let quality: 0 | 1 | 2 = 0
+      if (s.loaded) {
+        const i = Math.round(t * (s.count - 1))
+        s.request(i)
+        for (let k = 1; k <= 3; k++) s.request(i + k * dir)
+        s.request(i - dir)
+        const bm = s.nearest(i)
+        if (bm) {
+          img = bm
+          sw = bm.width
+          sh = bm.height
+          quality = s.has(i) ? 2 : 1
+        }
       }
-      const i = Math.round(t * (s.count - 1))
-      s.request(i)
-      for (let k = 1; k <= 3; k++) s.request(i + k * dir)
-      s.request(i - dir)
-      const bm = s.nearest(i)
-      if (!bm) return false
+      if (!img) {
+        // pas encore téléchargé : image fixe la plus proche (début, milieu ou fin du plan)
+        const st = stills.get(id)
+        const at = manifest?.clips[id]?.stillsAt
+        if (!st || !at) return 0
+        let k = 0
+        for (let j = 1; j < at.length; j++) if (Math.abs(at[j] - t) < Math.abs(at[k] - t)) k = j
+        img = st
+        sw = st.width
+        sh = st.height / at.length
+        sy = k * sh
+        quality = 1
+      }
       // zone de contenu C étirée sur toute la toile (la toile est ensuite transformée vers C)
       const kx = canvas.width / C.w
       const ky = canvas.height / C.h
       const D = dst ?? { x: 0, y: 0, w: C.w, h: C.h }
-      const cover = Math.max(D.w / bm.width, D.h / bm.height)
-      const w = bm.width * cover
-      const h = bm.height * cover
+      const cover = Math.max(D.w / sw, D.h / sh)
+      const w = sw * cover
+      const h = sh * cover
       const fx = variant === 'd' ? focalOf(id, t) : 0.5
       // en bande horizontale (portrait), on garde le haut du cadre, où sont les visages
       const fy = dst && variant === 'm' ? 0.4 : 0.5
@@ -186,9 +264,9 @@ export function Film({ onRequestStatic, onFail }: Props) {
         else ctx.rect(0, clipTop! * C.h, C.w, C.h)
         ctx.clip()
       }
-      ctx.drawImage(bm, x, y, w, h)
+      ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h)
       ctx.restore()
-      return true
+      return quality
     }
 
     /** calque papier percé par le mot géant ; renvoie le point d'ancrage du zoom (au cœur d'une lettre) */
@@ -233,16 +311,22 @@ export function Film({ onRequestStatic, onFail }: Props) {
 
     const preload = (st: FilmState) => {
       const idx = CLIP_ORDER.indexOf(st.clip.id)
-      // le clip affiché d'abord, seul : à l'arrivée, il ne partage pas la bande passante avec les suivants
-      const cur = seqs.get(st.clip.id)
-      if (cur && !cur.loaded) {
-        void cur.load().then(() => schedule())
-        return
+      // plans visibles maintenant : le plan affiché et ceux de l'écran partagé
+      const need = [...new Set([st.clip.id, ...(st.panels?.map((q) => q.id) ?? [])])]
+      const near = new Set([...need, ...[idx + 1, idx + 2, idx - 1].map((k) => CLIP_ORDER[k]).filter(Boolean)])
+      // téléchargements devenus inutiles : on libère la bande passante
+      for (const [id, sq] of seqs) if (!near.has(id) && sq.loading) sq.abort()
+      // d'abord les images fixes des plans visibles (légères), ensuite les paquets vidéo
+      if (need.some((id) => !stills.get(id) && (stillQueue.includes(id) || stills.get(id) === null))) return
+      // les paquets des plans visibles, un à la fois
+      for (const id of need) {
+        const sq = seqs.get(id)
+        if (sq && !sq.loaded && !sq.failed) {
+          void sq.load().then(() => schedule(true))
+          return
+        }
       }
-      for (const k of [idx, idx + 1, idx + 2, idx - 1]) {
-        const id = CLIP_ORDER[k]
-        if (id) void seqs.get(id)?.load()
-      }
+      for (const id of near) void seqs.get(id)?.load()
     }
 
     const render = () => {
@@ -252,6 +336,11 @@ export function Film({ onRequestStatic, onFail }: Props) {
       if (lastP >= 0 && p !== lastP) dir = p > lastP ? 1 : -1
       lastP = p
       const st = evaluate(p, L)
+      if (st.clip.id !== curClip) {
+        curClip = st.clip.id
+        // saut dans le film : les images fixes repartent du plan affiché
+        queueStills(curClip)
+      }
       preload(st)
 
       // cadre (masque) et toile (transformation inverse vers C)
@@ -275,21 +364,28 @@ export function Film({ onRequestStatic, onFail }: Props) {
       const key = `${st.clip.id}:${ia}|${C.w.toFixed(0)}x${C.h.toFixed(0)}|${st.clipB ? st.clipB.id + ':' + ib + ':' + st.clipB.wipe.toFixed(3) : ''}|${pk}|${ik}`
       if (key !== lastDrawKey || forceDraw) {
         forceDraw = false
-        let ok: boolean
+        // q : qualité la plus basse dessinée (2 exacte, 1 provisoire, 0 rien)
+        let q: number = 2
         if (st.panels) {
           // écran partagé : fond de nuit visible dans les interstices
           ctx.setTransform(1, 0, 0, 1, 0, 0)
           ctx.fillStyle = NIGHT
           ctx.fillRect(0, 0, canvas.width, canvas.height)
-          ok = true
-          for (const q of st.panels) {
-            if (q.r.x >= L.W || q.r.y >= L.H || q.r.x + q.r.w <= 0 || q.r.y + q.r.h <= 0) continue
-            ok = drawClip(q.id, q.t, C, undefined, q.r) && ok
+          for (const pn of st.panels) {
+            if (pn.r.x >= L.W || pn.r.y >= L.H || pn.r.x + pn.r.w <= 0 || pn.r.y + pn.r.h <= 0) continue
+            q = Math.min(q, drawClip(pn.id, pn.t, C, undefined, pn.r))
           }
         } else {
-          ok = drawClip(st.clip.id, st.clip.t, C)
-          if (st.clipB) drawClip(st.clipB.id, st.clipB.t, C, 1 - st.clipB.wipe)
+          q = drawClip(st.clip.id, st.clip.t, C)
+          if (q === 0 && readyFlag) {
+            // rien à montrer pour ce plan : plutôt la nuit qu'une image d'un autre plan
+            ctx.setTransform(1, 0, 0, 1, 0, 0)
+            ctx.fillStyle = NIGHT
+            ctx.fillRect(0, 0, canvas.width, canvas.height)
+          }
+          if (st.clipB) q = Math.min(q, drawClip(st.clipB.id, st.clipB.t, C, 1 - st.clipB.wipe))
         }
+        const ok = q > 0
         if (ok && st.iris) {
           // iris : tout ce qui est hors du cercle devient papier
           const kx = canvas.width / C.w
@@ -304,7 +400,8 @@ export function Film({ onRequestStatic, onFail }: Props) {
           ctx.restore()
         }
         if (ok) {
-          lastDrawKey = key
+          // une image provisoire sera redessinée dès que la vraie arrive
+          lastDrawKey = q === 2 ? key : ''
           if (!readyFlag) {
             readyFlag = true
             setReady(true)
@@ -374,7 +471,7 @@ export function Film({ onRequestStatic, onFail }: Props) {
     }
 
     measure()
-    fetch(`${MEDIA}manifest.json`)
+    fetch(`${MEDIA}manifest.json`, { cache: 'no-cache' })
       .then((r) => {
         if (!r.ok) throw new Error('manifest')
         return r.json()
@@ -425,8 +522,8 @@ export function Film({ onRequestStatic, onFail }: Props) {
     <section ref={secRef} className="fm" style={{ ['--len' as string]: TOTAL }} aria-label="Récit interactif : Changeons de regard">
       <div ref={stageRef} className={`fm-stage ${ready ? 'is-ready' : ''}`} data-tone="dark">
         <picture className="fm-poster" aria-hidden="true">
-          <source media="(max-aspect-ratio: 1/1)" srcSet={`${MEDIA}poster-m.webp`} />
-          <img src={`${MEDIA}poster-d.webp`} alt="" fetchPriority="high" />
+          <source media="(max-aspect-ratio: 1/1)" srcSet={`${MEDIA}poster-m.webp?v=${POSTER_V}`} />
+          <img src={`${MEDIA}poster-d.webp?v=${POSTER_V}`} alt="" fetchPriority="high" />
         </picture>
         <div className="fm-paper" />
 
