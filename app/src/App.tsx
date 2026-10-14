@@ -1,3 +1,4 @@
+import { Logo } from './components/Logo'
 import { useEffect, useRef } from 'react'
 import { BrowserRouter, HashRouter, Link, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import { Navigation } from './components/Navigation'
@@ -38,7 +39,9 @@ function Layout() {
       <footer className="site-footer">
         <div className="container footer-grid">
           <div>
-            <p className="brand-name">{BRAND.name}</p>
+            <p className="footer-logo" aria-label={`${BRAND.name}, ${BRAND.long}`}>
+              <Logo />
+            </p>
             <p className="small">{BRAND.baseline}</p>
           </div>
           <nav aria-label="Pied de page">

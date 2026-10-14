@@ -33,7 +33,7 @@ const Todo = ({ children }: { children: ReactNode }) => (
 )
 
 export function SolutionsPage() {
-  usePageMeta('Nos solutions — Changeons de regard', 'Révéler les talents, développer des collaborations avec le secteur adapté et protégé, y voir clair sur vos obligations.')
+  usePageMeta('Nos solutions — ICRH', 'Révéler les talents, développer des collaborations avec le secteur adapté et protégé, y voir clair sur vos obligations.')
   return (
     <>
       <PageHero eyebrow="Nos solutions" title="Passer du constat à l’action." intro="Trois axes pour avancer, selon votre situation." image="scene-13" />
@@ -53,7 +53,7 @@ export function SolutionsPage() {
 }
 
 export function OethPage() {
-  usePageMeta('Comprendre l’OETH — Changeons de regard', 'Obligation d’emploi des travailleurs handicapés : les repères essentiels et les leviers d’action.')
+  usePageMeta('Comprendre l’OETH — ICRH', 'Obligation d’emploi des travailleurs handicapés : les repères essentiels et les leviers d’action.')
   return (
     <>
       <PageHero
@@ -93,7 +93,7 @@ export function OethPage() {
 }
 
 export function EaEsatPage() {
-  usePageMeta('Entreprises adaptées et ESAT — Changeons de regard', 'Développer des collaborations utiles avec le secteur adapté et protégé.')
+  usePageMeta('Entreprises adaptées et ESAT — ICRH', 'Développer des collaborations utiles avec le secteur adapté et protégé.')
   return (
     <>
       <PageHero
@@ -117,7 +117,7 @@ export function EaEsatPage() {
 }
 
 export function AboutPage() {
-  usePageMeta('À propos — Changeons de regard', 'Qui nous sommes et comment nous accompagnons les entreprises.')
+  usePageMeta('À propos — ICRH', 'Qui nous sommes et comment nous accompagnons les entreprises.')
   return (
     <>
       <PageHero eyebrow="À propos" title="Changeons de regard." intro="Changer la perception du handicap, et changer d’angle pour voir les compétences." image="scene-12" />
@@ -132,12 +132,12 @@ export function AboutPage() {
 }
 
 export function ContactPage() {
-  usePageMeta('Contact — Changeons de regard', 'Faisons le point sur votre situation.')
+  usePageMeta('Contact — ICRH', 'Faisons le point sur votre situation.')
   return <ContactForm headingLevel={1} />
 }
 
 export function NotFound() {
-  usePageMeta('Page introuvable — Changeons de regard', 'Cette page n’existe pas.')
+  usePageMeta('Page introuvable — ICRH', 'Cette page n’existe pas.')
   return (
     <div className="container prose page-pad">
       <h1>Page introuvable</h1>

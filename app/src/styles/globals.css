@@ -208,14 +208,56 @@ a:hover {
   font-weight: 800;
   letter-spacing: -0.01em;
 }
-.brand-mark {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  display: grid;
-  place-items: center;
-  font-size: 0.8rem;
-  border: 1.5px solid currentColor;
+/* Logo ICRH : déployé (mot-symbole + nom) en haut de page, compact au défilement — transform et opacity seulement */
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+.logo-word {
+  height: 32px;
+  width: auto;
+  display: block;
+  transform-origin: left center;
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.logo-name {
+  display: flex;
+  flex-direction: column;
+  padding-left: 14px;
+  border-left: 1.5px solid color-mix(in srgb, currentColor 35%, transparent);
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: 0;
+  white-space: nowrap;
+  transition: opacity 0.25s, transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.logo.is-compact .logo-word {
+  transform: scale(0.72);
+}
+.logo.is-compact .logo-name {
+  opacity: 0;
+  transform: translateX(-24px);
+  pointer-events: none;
+}
+.footer-logo {
+  margin: 0 0 0.5rem;
+}
+.footer-logo .logo-word {
+  height: 34px;
+}
+@media (max-width: 760px) {
+  .logo {
+    gap: 10px;
+  }
+  .logo-word {
+    height: 24px;
+  }
+  .logo-name {
+    padding-left: 10px;
+    font-size: 0.66rem;
+  }
 }
 .brand-name {
   font-size: 1rem;

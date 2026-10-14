@@ -5,9 +5,8 @@
  */
 
 export const BRAND = {
-  name: 'Changeons de regard',
-  /** logo provisoire */
-  short: 'CR',
+  name: 'ICRH',
+  long: 'Institut Changeons de Regard sur le Handicap',
   baseline: 'Inclusion et handicap en entreprise',
 }
 

@@ -2,10 +2,19 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { BRAND, NAV } from '../content/site'
 import { useTheme } from './themeContext'
+import { Logo } from './Logo'
 
 export function Navigation() {
   const { theme } = useTheme()
   const [open, setOpen] = useState(false)
+  // logo déployé en haut de page, compact dès qu'on fait défiler
+  const [compact, setCompact] = useState(false)
+  useEffect(() => {
+    const on = () => setCompact(window.scrollY > 24)
+    on()
+    window.addEventListener('scroll', on, { passive: true })
+    return () => window.removeEventListener('scroll', on)
+  }, [])
   const loc = useLocation()
   const btnRef = useRef<HTMLButtonElement>(null)
   const isHome = loc.pathname === '/'
@@ -33,16 +42,13 @@ export function Navigation() {
   }
 
   return (
-    <header className={`site-nav theme-${isHome ? theme : 'light'} ${open ? 'is-open' : ''}`}>
+    <header className={`site-nav theme-${isHome ? theme : 'light'} ${open ? 'is-open' : ''} ${compact ? 'is-compact' : ''}`}>
       <a className="skip-link" href="#main">
         Aller au contenu
       </a>
       <div className="nav-inner">
-        <Link to="/" className="brand" aria-label={`${BRAND.name} — accueil`}>
-          <span className="brand-mark" aria-hidden="true">
-            {BRAND.short}
-          </span>
-          <span className="brand-name">{BRAND.name}</span>
+        <Link to="/" className="brand" aria-label={`${BRAND.name}, ${BRAND.long} — accueil`}>
+          <Logo compact={compact} />
         </Link>
         <nav aria-label="Navigation principale" className="nav-links" id="nav-menu">
           <ul>

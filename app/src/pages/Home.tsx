@@ -8,7 +8,7 @@ import { usePageMeta } from './usePageMeta'
 
 export default function Home() {
   usePageMeta(
-    'Changeons de regard — Inclusion et handicap en entreprise',
+    'ICRH — Institut Changeons de Regard sur le Handicap',
     'Recrutement, intégration, OETH, entreprises adaptées et ESAT : comprendre vos obligations et identifier les solutions adaptées à votre entreprise.',
   )
   const { reduced, setPref } = useReducedMotion()
