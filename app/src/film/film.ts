@@ -169,9 +169,11 @@ export function evaluate(p: number, L: Layout): FilmState {
       break
     }
     case 'screen': {
-      full('c03', seg(u, 0, 0.9))
-      st.texts.def = txt(u, 0.06, 0.2, 0.55, 0.68)
-      st.scrim = 1 - seg(u, 0.6, 0.85)
+      full('c03', seg(u, 0, 0.92))
+      // dans la salle, la phrase est posée sur l'image ; quand l'écran remplit le cadre, elle s'y affiche comme sa diapositive
+      st.texts.def = txt(u, 0.06, 0.18, 0.4, 0.5)
+      st.texts.slide = out(seg(u, 0.58, 0.8))
+      st.scrim = 1 - seg(u, 0.42, 0.6)
       break
     }
     case 'chart': {
@@ -179,7 +181,9 @@ export function evaluate(p: number, L: Layout): FilmState {
       full('c03', 1)
       st.paper = seg(u, 0, 0.08)
       st.frame.opacity = 1 - seg(u, 0.02, 0.1)
-      const draw = io(seg(u, 0.08, 0.4))
+      // la diapositive cède la place au graphique, qui commence à se dessiner aussitôt
+      st.texts.slide = 1 - seg(u, 0.0, 0.08)
+      const draw = io(seg(u, 0.04, 0.36))
       st.chart = { draw, opacity: 1 - seg(u, 0.72, 0.86) }
       st.texts.comp = txt(u, 0.1, 0.2, 0.36, 0.43)
       st.texts.avance = txt(u, 0.44, 0.52, 0.64, 0.7)

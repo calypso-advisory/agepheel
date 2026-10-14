@@ -181,6 +181,17 @@
   color: var(--white);
   text-shadow: 0 4px 40px rgba(0, 0, 0, 0.5);
 }
+/* texte affiché sur l'écran de présentation : encre sombre, centré, sans ombre */
+.fm-text.pos-slide {
+  translate: none;
+  left: 10vw;
+  right: 10vw;
+  top: 50%;
+  margin-top: -1.1em;
+  text-align: center;
+  color: var(--blue-deep);
+  text-shadow: none;
+}
 [data-layout='port'] .fm-text.pos-col {
   top: var(--ty);
 }

@@ -36,7 +36,7 @@ export const CLIPS: ClipDef[] = [
   { id: 'c09', label: 'La caméra s’approche lentement de son visage jusqu’à ses yeux.', focal: [[0, 0.32], [1, 0.5]] },
 ]
 
-export type TextPos = 'over' | 'col' | 'center'
+export type TextPos = 'over' | 'col' | 'center' | 'slide'
 
 export interface FilmText {
   id: string
@@ -51,6 +51,8 @@ export interface FilmText {
 export const TEXTS: FilmText[] = [
   { id: 'regard', text: 'Certains méritent simplement qu’on les regarde autrement.', short: 'Regardons autrement.', pos: 'over', size: 'l' },
   { id: 'def', text: 'Le handicap ne définit pas un talent.', pos: 'over', size: 'l' },
+  /** la même phrase, affichée sur l'écran de présentation quand il remplit le cadre (comme sa diapositive) */
+  { id: 'slide', text: 'Le handicap ne définit pas un talent.', pos: 'slide', size: 'xl' },
   { id: 'comp', text: 'Ce sont ses compétences qui font la différence.', pos: 'col', size: 'xl' },
   { id: 'avance', text: 'Quand chacun apporte ses compétences, c’est toute l’entreprise qui avance.', pos: 'col', size: 'l' },
   { id: 'diff', text: 'Des compétences différentes.', pos: 'over', size: 'l' },
