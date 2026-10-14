@@ -20,7 +20,7 @@ export default function Home() {
     <>
       {film ? (
         <>
-          <Film onRequestStatic={() => setPref('reduce')} onFail={onFail} />
+          <Film onFail={onFail} />
           <EditorialStory visuallyHidden />
         </>
       ) : (

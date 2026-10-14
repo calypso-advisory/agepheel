@@ -29,7 +29,6 @@ interface Manifest {
 }
 
 interface Props {
-  onRequestStatic: () => void
   onFail: () => void
 }
 
@@ -47,7 +46,7 @@ const focalOf = (id: string, t: number) => {
   return f[f.length - 1][1]
 }
 
-export function Film({ onRequestStatic, onFail }: Props) {
+export function Film({ onFail }: Props) {
   const secRef = useRef<HTMLElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
   const { setTheme } = useTheme()
@@ -69,6 +68,7 @@ export function Film({ onRequestStatic, onFail }: Props) {
     const bars = Array.from(stage.querySelectorAll<HTMLElement>('.fm-bar'))
     const cta = q('.fm-cta')
     const hint = q('.fm-hint')
+    const tools = q('.fm-tools')
     const hero = q('.fm-hero')
     const knock = q<HTMLCanvasElement>('.fm-knock')
     const PAPER = '#f7f8f6'
@@ -209,7 +209,7 @@ export function Film({ onRequestStatic, onFail }: Props) {
      * dst : sous-rectangle de C (écran partagé), clipTop : volet vertical
      */
     /** résultat : 2 = image exacte, 1 = image approchée ou image fixe de secours, 0 = rien */
-    const drawClip = (id: string, t: number, C: Rect, clipTop?: number, dst?: Rect): 0 | 1 | 2 => {
+    const drawClip = (id: string, t: number, C: Rect, clipTop?: number, dst?: Rect, fyPanel?: number): 0 | 1 | 2 => {
       const s = seqs.get(id)
       if (!s) return 0
       let img: CanvasImageSource | null = null
@@ -253,7 +253,7 @@ export function Film({ onRequestStatic, onFail }: Props) {
       const h = sh * cover
       const fx = variant === 'd' ? focalOf(id, t) : 0.5
       // en bande horizontale (portrait), on garde le haut du cadre, où sont les visages
-      const fy = dst && variant === 'm' ? 0.4 : 0.5
+      const fy = dst && variant === 'm' ? (fyPanel ?? 0.4) : 0.5
       const x = D.x + Math.min(0, Math.max(D.w - w, D.w / 2 - fx * w))
       const y = D.y + Math.min(0, Math.max(D.h - h, D.h / 2 - fy * h))
       ctx.save()
@@ -281,24 +281,36 @@ export function Film({ onRequestStatic, onFail }: Props) {
       k.fillStyle = PAPER
       k.fillRect(0, 0, L.W, L.H)
       const family = getComputedStyle(stage).fontFamily || 'sans-serif'
-      let size = L.H * 0.4
+      // en portrait, le mot se dresse à la verticale et occupe toute la hauteur de l'écran
+      const vertical = !L.land
+      const span = vertical ? L.H * 0.86 : L.W * 0.9
+      let size = vertical ? L.W * 0.62 : L.H * 0.4
       k.font = `800 ${size}px ${family}`
       const m = k.measureText(KNOCKOUT_WORD).width
-      size = Math.min(size, (size * L.W * 0.9) / m)
+      size = Math.min(size, (size * span) / m)
       k.font = `800 ${size}px ${family}`
       k.textAlign = 'center'
       k.textBaseline = 'middle'
       k.globalCompositeOperation = 'destination-out'
-      k.fillText(KNOCKOUT_WORD, L.W / 2, L.H / 2)
+      k.save()
+      k.translate(L.W / 2, L.H / 2)
+      if (vertical) k.rotate(-Math.PI / 2)
+      k.fillText(KNOCKOUT_WORD, 0, 0)
+      k.restore()
       // point le plus éloigné de tout papier, cherché sur une grille grossière
       const img = k.getImageData(0, 0, knock.width, knock.height).data
       const step = Math.max(2, Math.round(size / 40))
-      const open = (x: number, y: number) => img[(Math.round(y * kd) * knock.width + Math.round(x * kd)) * 4 + 3] < 128
+      const open = (x: number, y: number) => {
+        if (x < 0 || y < 0 || x >= L.W || y >= L.H) return false
+        return img[(Math.round(y * kd) * knock.width + Math.round(x * kd)) * 4 + 3] < 128
+      }
       let best = { x: L.W / 2, y: L.H / 2, d: 1 }
-      const y0 = L.H / 2 - size * 0.4
-      const y1 = L.H / 2 + size * 0.4
+      const x0 = vertical ? L.W / 2 - size * 0.4 : L.W * 0.05
+      const x1 = vertical ? L.W / 2 + size * 0.4 : L.W * 0.95
+      const y0 = vertical ? L.H * 0.05 : L.H / 2 - size * 0.4
+      const y1 = vertical ? L.H * 0.95 : L.H / 2 + size * 0.4
       for (let y = y0; y <= y1; y += step) {
-        for (let x = L.W * 0.05; x <= L.W * 0.95; x += step) {
+        for (let x = x0; x <= x1; x += step) {
           if (!open(x, y)) continue
           let d = step
           while (d < size && open(x + d, y) && open(x - d, y) && open(x, y + d) && open(x, y - d) && open(x + d * 0.7, y + d * 0.7) && open(x - d * 0.7, y - d * 0.7) && open(x + d * 0.7, y - d * 0.7) && open(x - d * 0.7, y + d * 0.7)) d += step
@@ -373,7 +385,7 @@ export function Film({ onRequestStatic, onFail }: Props) {
           ctx.fillRect(0, 0, canvas.width, canvas.height)
           for (const pn of st.panels) {
             if (pn.r.x >= L.W || pn.r.y >= L.H || pn.r.x + pn.r.w <= 0 || pn.r.y + pn.r.h <= 0) continue
-            q = Math.min(q, drawClip(pn.id, pn.t, C, undefined, pn.r))
+            q = Math.min(q, drawClip(pn.id, pn.t, C, undefined, pn.r, pn.fy))
           }
         } else {
           q = drawClip(st.clip.id, st.clip.t, C)
@@ -440,6 +452,15 @@ export function Film({ onRequestStatic, onFail }: Props) {
         set(knock, 'transform', `scale(${(1 + st.knock.scale * (K - 1)).toPrecision(6)})`)
       }
       op(hero, st.hero)
+      // en portrait, « Passer » n'apparaît qu'à l'accueil : ensuite, l'image a tout l'écran
+      if (!L.land) {
+        op(tools, st.hero)
+        if (st.hero < 0.5) tools.setAttribute('inert', '')
+        else tools.removeAttribute('inert')
+      } else {
+        op(tools, 1)
+        tools.removeAttribute('inert')
+      }
       set(hero, 'transform', `translate3d(0,${((1 - st.hero) * -24).toFixed(1)}px,0)`)
       if (st.hero < 0.5) hero.setAttribute('inert', '')
       else hero.removeAttribute('inert')
@@ -629,9 +650,6 @@ export function Film({ onRequestStatic, onFail }: Props) {
           <button type="button" className="fm-btn" onClick={skip}>
             <span className="only-wide">Passer l’introduction</span>
             <span className="only-narrow">Passer</span>
-          </button>
-          <button type="button" className="fm-btn fm-btn-quiet" onClick={onRequestStatic}>
-            Sans animation
           </button>
         </div>
 

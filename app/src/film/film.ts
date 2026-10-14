@@ -47,7 +47,7 @@ export interface FilmState {
   cta: number
   hint: number
   /** écran partagé : plusieurs clips, chacun dans son panneau (coordonnées de la scène) */
-  panels?: (ClipRef & { r: Rect })[]
+  panels?: (ClipRef & { r: Rect; fy?: number })[]
   /** lettres découpées : échelle du calque papier percé par le mot, opacité */
   knock: { scale: number; opacity: number }
   /** iris : cercle (coordonnées de la scène) hors duquel l'image est remplacée par le papier */
@@ -171,9 +171,15 @@ export function evaluate(p: number, L: Layout): FilmState {
     case 'screen': {
       full('c03', seg(u, 0, 0.92))
       // dans la salle, la phrase est posée sur l'image ; quand l'écran remplit le cadre, elle s'y affiche comme sa diapositive
-      st.texts.def = txt(u, 0.06, 0.18, 0.4, 0.5)
-      st.texts.slide = out(seg(u, 0.48, 0.66))
-      st.scrim = 1 - seg(u, 0.42, 0.6)
+      if (L.land) {
+        st.texts.def = txt(u, 0.06, 0.18, 0.4, 0.5)
+        st.texts.slide = out(seg(u, 0.48, 0.66))
+        st.scrim = 1 - seg(u, 0.42, 0.6)
+      } else {
+        // en portrait, l'écran remplit vite le cadre : la phrase s'y affiche directement, en encre sombre
+        st.texts.slide = out(seg(u, 0.4, 0.6))
+        st.scrim = 1 - seg(u, 0.1, 0.3)
+      }
       break
     }
     case 'chart': {
@@ -267,9 +273,10 @@ export function evaluate(p: number, L: Layout): FilmState {
         p2 = lerpRect(slot(2), S, grow)
       }
       st.panels = [
-        { id: 'f1', t: 1, r: p0 },
-        { id: 'r1', t: seg(u, 0.1, 0.9), r: p1 },
-        { id: 'o1', t: 0, r: p2 },
+        // fy : en bandes horizontales (portrait), hauteur du cadrage pour garder les visages
+        { id: 'f1', t: 1, r: p0, fy: 0.22 },
+        { id: 'r1', t: seg(u, 0.1, 0.9), r: p1, fy: 0.3 },
+        { id: 'o1', t: 0, r: p2, fy: 0.24 },
       ]
       st.texts.seul = txt(u, 0.3, 0.4, 0.5, 0.56)
       st.texts.coll = txt(u, 0.56, 0.64, 0.74, 0.8)
@@ -314,6 +321,18 @@ export function evaluate(p: number, L: Layout): FilmState {
     }
     case 'oeth': {
       // le film se range dans la moitié droite (le haut en portrait) ; à chaque chiffre, une autre personne, un autre métier
+      if (!L.land) {
+        // portrait : l'image reste plein écran, teintée de bleu nuit, et les chiffres s'écrivent dessus en blanc
+        st.paper = 0
+        st.clip = u < 0.44 ? { id: 'c08', t: 1 } : u < 0.74 ? { id: 'p1', t: 0.2 } : { id: 'c02', t: 1 }
+        st.frame = { R: S, C: S, opacity: 1 - seg(u, 0.95, 1), fill: 0.74 * io(seg(u, 0, 0.12)) }
+        st.oeth.s1 = txt(u, 0.1, 0.19, 0.38, 0.44)
+        st.oeth.people = seg(u, 0.14, 0.33)
+        st.oeth.s2 = txt(u, 0.44, 0.52, 0.68, 0.74)
+        st.oeth.dots = seg(u, 0.48, 0.64)
+        st.oeth.s3 = txt(u, 0.75, 0.83, 0.94, 1)
+        break
+      }
       st.paper = 1
       const away = io(seg(u, 0, 0.13))
       const band: Rect = L.land ? card : { x: L.G, y: card.y, w: L.W - 2 * L.G, h: Math.round((L.H - card.y) * 0.3) }
@@ -353,6 +372,15 @@ export function evaluate(p: number, L: Layout): FilmState {
         ? { x: card.x + card.w * 0.5, y: card.y + card.h * 0.5, r: Math.min(card.w, card.h) * 0.42 }
         : { x: card.x + card.w * 0.5, y: card.y + card.h * 0.5, r: Math.min(card.w, card.h) * 0.46 }
       st.iris = { x: lerp(eye.x, rest.x, k), y: lerp(eye.y, rest.y, k), r: lerp(diag * 1.05, rest.r, k) }
+      if (!L.land) {
+        // portrait : l'image accompagne le cercle, l'œil reste au centre de l'iris
+        // l'image ne descend jamais sous la taille du cercle (sinon il serait coupé sur les côtés)
+        const sc = lerp(1, Math.max(0.78, (2.15 * rest.r) / L.W), k)
+        const ex = 0.5
+        const ey = 0.48
+        st.iris = { x: lerp(L.W * ex, rest.x, k), y: lerp(L.H * ey, rest.y, k), r: lerp(diag * 1.05, rest.r, k) }
+        st.frame.C = { x: st.iris.x - ex * L.W * sc, y: st.iris.y - ey * L.H * sc, w: L.W * sc, h: L.H * sc }
+      }
       st.paper = seg(u, 0.05, 0.3)
       st.cta = out(seg(u, 0.4, 0.75))
       break

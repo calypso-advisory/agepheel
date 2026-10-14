@@ -28,6 +28,17 @@ Neuf clips Runway (Kling 3.0 Pro, 5 s chacun, image de départ et image d’arri
 
 Longueur : ≈ 29 hauteurs d’écran (réglage `PACE` dans `src/film/storyboard.ts`).
 
+## Mobile (portrait) — version dédiée
+
+Même film, mise en scène adaptée (le bureau n'est pas modifié) :
+- textes plus grands, posés plus bas sur un voile plus dense, avec un filet couleur iris ;
+- « Passer » seulement à l'accueil ; plus de bouton « Sans animation » (le réglage système « réduire les animations » reste respecté) ;
+- écran de présentation : la phrase s'affiche directement sur l'écran ;
+- écran partagé : trois bandes cadrées sur les visages ;
+- OETH : l'image reste plein écran, teintée de bleu nuit, chiffres en blanc et couleur iris ;
+- « REGARD » à la verticale, sur toute la hauteur ;
+- conclusion : l'image suit le cercle, l'œil reste au centre (recadrage mobile du dernier plan corrigé).
+
 ## Chargement
 
 - Paquets nommés par empreinte de contenu (`tools/finalize-media.py`) : un clip régénéré change d’adresse, aucun cache ne ressort l’ancien.

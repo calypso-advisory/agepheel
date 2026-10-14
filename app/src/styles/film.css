@@ -203,9 +203,43 @@
 [data-layout='port'] .fm-text.pos-col.size-l {
   font-size: clamp(1.7rem, 1rem + 4.2vw, 3rem);
 }
+/* portrait : textes plus grands, plus serrés, posés sur un voile plus dense, avec un filet couleur iris */
 [data-layout='port'] .fm-text.pos-over {
-  right: 20px;
-  bottom: 84px;
+  left: 24px;
+  right: 24px;
+  bottom: 96px;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.04;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.45);
+}
+[data-layout='port'] .fm-text.pos-over.size-l {
+  font-size: clamp(2.05rem, 1.2rem + 3.6vw, 3.2rem);
+}
+[data-layout='port'] .fm-text.pos-over.size-xl {
+  font-size: clamp(2.5rem, 1.4rem + 4.6vw, 3.8rem);
+}
+[data-layout='port'] .fm-text.pos-over::before {
+  content: '';
+  display: block;
+  width: 36px;
+  height: 3px;
+  border-radius: 2px;
+  margin-bottom: 16px;
+  background: #6fd3c7;
+}
+[data-layout='port'] .fm-text.pos-center {
+  font-weight: 800;
+  font-size: clamp(2.4rem, 1.4rem + 4.4vw, 3.6rem);
+}
+[data-layout='port'] .fm-text.pos-slide {
+  left: 24px;
+  right: 24px;
+  font-size: clamp(2.3rem, 1.3rem + 4.4vw, 3.4rem);
+}
+[data-layout='port'] .fm-scrim {
+  height: 72%;
+  background: linear-gradient(to top, rgba(8, 18, 27, 0.9), rgba(8, 18, 27, 0.5) 42%, rgba(8, 18, 27, 0));
 }
 
 /* ------------------------------ Accueil ------------------------------ */
@@ -339,13 +373,39 @@
   background: var(--blue);
   opacity: 0;
 }
+/* portrait : chiffres en blanc sur l'image plein écran teintée (cf. film.ts) */
 [data-layout='port'] .fm-o {
-  left: 20px;
-  right: 20px;
+  left: 24px;
+  right: 24px;
   width: auto;
-  /* sous la bande d'image (30 % de la hauteur utile, cf. film.ts) */
-  top: calc(var(--cy) + (100svh - var(--cy)) * 0.3 + 24px);
+  top: auto;
+  bottom: 72px;
   transform: none;
+  color: var(--white);
+}
+[data-layout='port'] .fm-o-fig {
+  color: #6fd3c7;
+  font-size: clamp(6rem, 3rem + 14vw, 9rem);
+}
+[data-layout='port'] .fm-o-text,
+[data-layout='port'] .fm-o-q {
+  color: var(--white);
+}
+[data-layout='port'] .fm-o-q {
+  font-size: clamp(2.4rem, 1.4rem + 4.6vw, 3.6rem);
+}
+[data-layout='port'] .fm-o-note {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.72rem;
+}
+[data-layout='port'] .fm-person {
+  fill: var(--white);
+}
+[data-layout='port'] .fm-dot {
+  background: rgba(255, 255, 255, 0.22);
+}
+[data-layout='port'] .fm-dot.is-on {
+  background: #6fd3c7;
 }
 
 /* ------------------------------ Conclusion ------------------------------ */
