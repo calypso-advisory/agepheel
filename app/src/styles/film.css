@@ -660,21 +660,4 @@ html.snap-steps {
 html.snap-steps #solutions {
   scroll-snap-align: start;
 }
-.fm-step {
-  position: absolute;
-  right: 16px;
-  top: calc(var(--nav-h) + 8px);
-  margin: 0;
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: rgba(10, 22, 33, 0.5);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: var(--white);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-}
-[data-layout='land'] .fm-step {
-  display: none;
-}
+

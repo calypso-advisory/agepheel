@@ -72,8 +72,6 @@ export function Film({ onFail, steps = false }: Props) {
     const cta = q('.fm-cta')
     const hint = q('.fm-hint')
     const stopEls = Array.from(sec.querySelectorAll<HTMLElement>('.fm-stop'))
-    const stepNum = stage.querySelector<HTMLElement>('.fm-step-n')
-    let lastStep = -1
     // aimantation active seulement dans le film, en portrait : au-delà, la page défile librement
     const updateSnap = () => {
       if (!steps) return
@@ -370,10 +368,41 @@ export function Film({ onFail, steps = false }: Props) {
       for (const id of near) void seqs.get(id)?.load()
     }
 
+    /**
+     * Mode étapes (portrait) : le défilement natif s'aimante vite d'un arrêt à l'autre ; le film, lui,
+     * rejoint l'arrêt à son propre rythme (vitesse constante, départ et arrivée adoucis).
+     * Seuls transform et opacity sont écrits, image par image : la fluidité reste celle du moteur.
+     */
+    const SPEED = 0.5 // hauteurs d'écran du film par seconde
+    let tw: { from: number; to: number; t0: number; d: number } | null = null
+    let shown = -1
+    const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
+    const paced = (raw: number) => {
+      if (!steps || L.land || shown < 0) {
+        shown = raw
+        tw = null
+        return raw
+      }
+      const now = performance.now()
+      if (!tw || Math.abs(tw.to - raw) > 1e-5) {
+        const d = Math.min(2.6, Math.max(1.2, (Math.abs(raw - shown) * TOTAL) / SPEED)) * 1000
+        const k0 = tw ? (now - tw.t0) / tw.d : 1
+        if (tw && k0 < 0.5 && Math.sign(raw - tw.from) === Math.sign(tw.to - tw.from)) {
+          // l'aimantation native avance encore vers le même arrêt : on prolonge la transition sans la relancer
+          tw.to = raw
+          tw.d = Math.min(2.6, Math.max(1.2, (Math.abs(raw - tw.from) * TOTAL) / SPEED)) * 1000
+        } else tw = { from: shown, to: raw, t0: now, d }
+      }
+      const k = Math.min(1, (now - tw.t0) / tw.d)
+      shown = tw.from + (tw.to - tw.from) * ease(k)
+      if (k < 1) schedule()
+      return shown
+    }
+
     const render = () => {
       raf = 0
       if (destroyed) return
-      const p = Math.min(1, Math.max(0, (window.scrollY - top) / dist))
+      const p = paced(Math.min(1, Math.max(0, (window.scrollY - top) / dist)))
       if (lastP >= 0 && p !== lastP) dir = p > lastP ? 1 : -1
       lastP = p
       const st = evaluate(p, L)
@@ -473,14 +502,6 @@ export function Film({ onFail, steps = false }: Props) {
       if (st.cta < 0.5) cta.setAttribute('inert', '')
       else cta.removeAttribute('inert')
       op(hint, st.hint)
-      if (stepNum) {
-        let k = 0
-        for (let i = 0; i < STOP_P.length; i++) if (p >= STOP_P[i] - 0.002) k = i
-        if (k !== lastStep) {
-          lastStep = k
-          stepNum.textContent = `${k + 1} / ${STOP_P.length}`
-        }
-      }
       {
         // pas pendant l'accueil (qui a déjà son indication), ni à la conclusion, ni par-dessus un texte du film
         const textOn = Object.values(st.texts).some((a) => a > 0.3) || st.oeth.s1 + st.oeth.s2 + st.oeth.s3 > 0.3
@@ -534,6 +555,7 @@ export function Film({ onFail, steps = false }: Props) {
       schedule()
     }
     const onResize = () => {
+      // (iPhone : la barre d'adresse qui se replie déclenche un redimensionnement ; on ne casse pas la transition en cours)
       measure()
       schedule(true)
     }
@@ -696,12 +718,6 @@ export function Film({ onFail, steps = false }: Props) {
             </a>
           </div>
         </div>
-
-        {steps && (
-          <p className="fm-step" aria-hidden="true">
-            Étape <span className="fm-step-n">1 / {STOP_P.length}</span>
-          </p>
-        )}
 
         <p className="fm-cue" aria-hidden="true">
           Continuez à faire défiler pour voir la suite
