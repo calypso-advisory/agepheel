@@ -40,7 +40,7 @@ function Layout() {
         <div className="container footer-grid">
           <div>
             <p className="footer-logo" aria-label={`${BRAND.name}, ${BRAND.long}`}>
-              <Logo />
+              <Logo tone="sombre" />
             </p>
             <p className="small">{BRAND.baseline}</p>
           </div>

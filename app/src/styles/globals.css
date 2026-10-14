@@ -208,77 +208,62 @@ a:hover {
   font-weight: 800;
   letter-spacing: -0.01em;
 }
-/* Logo ICRH : déployé (mot-symbole + nom) en haut de page, compact au défilement — transform et opacity seulement */
+/* Logo ICRH : déployé (monogramme + nom) en haut de page, réduit au monogramme au défilement — transform et opacity seulement */
 .logo {
-  --logo-accent: #1f7a74;
   display: inline-flex;
   align-items: center;
-  gap: 14px;
+  height: 60px;
 }
-.logo-word {
-  height: 32px;
-  width: auto;
+.logo img {
   display: block;
+  height: 100%;
+  width: auto;
+}
+.logo-mono,
+.logo-name {
+  position: relative;
+  display: block;
+  height: 100%;
+}
+.logo-mono {
   transform-origin: left center;
   transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 .logo-name {
-  display: flex;
-  flex-direction: column;
-  padding-left: 14px;
-  border-left: 1.5px solid color-mix(in srgb, currentColor 35%, transparent);
-  font-size: 0.78rem;
-  font-weight: 600;
-  line-height: 1.25;
-  letter-spacing: 0;
-  white-space: nowrap;
+  margin-left: -2px;
   transition: opacity 0.25s, transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
-.logo-name b {
-  font-weight: 800;
-  color: var(--logo-accent);
+/* déclinaison selon le fond : la version claire sur fond clair, la sombre sur fond sombre ou photo */
+.logo-auto .on-sombre,
+.theme-dark .logo-auto .on-clair {
+  display: none;
 }
-/* l'iris : il regarde vers le nom ; en version compacte, il se tourne vers le visiteur */
-.logo-iris {
-  transition: transform 0.6s cubic-bezier(0.3, 0.7, 0.2, 1) 0.1s;
+.theme-dark .logo-auto .on-sombre {
+  display: block;
 }
-.logo.is-compact .logo-iris {
-  transform: translate(var(--iris-x), var(--iris-y));
-}
-.logo.is-compact .logo-word {
-  transform: scale(0.72);
+.logo.is-compact .logo-mono {
+  transform: scale(0.66);
 }
 .logo.is-compact .logo-name {
   opacity: 0;
-  transform: translateX(-24px);
+  transform: translateX(-28px);
   pointer-events: none;
 }
-.theme-dark .logo,
-.site-footer .logo {
-  --logo-accent: #6fd3c7;
-}
 .footer-logo {
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.75rem;
 }
-.footer-logo .logo-word {
-  height: 34px;
+.footer-logo .logo {
+  height: 64px;
 }
 @media (max-width: 760px) {
   .logo {
-    gap: 10px;
+    height: 48px;
   }
-  .logo-word {
-    height: 24px;
-  }
-  .logo-name {
-    padding-left: 10px;
-    font-size: 0.66rem;
+  .logo.is-compact .logo-mono {
+    transform: scale(0.72);
   }
 }
-.brand-name {
-  font-size: 1rem;
-  font-weight: 800;
-}
+
 .nav-links {
   display: flex;
   align-items: center;

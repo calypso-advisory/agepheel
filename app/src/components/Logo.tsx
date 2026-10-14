@@ -1,48 +1,26 @@
-import { LOGO } from './logoPaths'
-
 /**
- * Mot-symbole ICRH : le C de « Changeons » est un œil (ouverture inclinée, pupille tournée vers « RH »).
- * Tracés générés par tools/build-logo.py ; couleur = currentColor (suit le thème de l'en-tête).
+ * Logo ICRH — Institut Changeons de Regard sur le Handicap.
+ * Deux déclinaisons (public/brand) : « clair » pour les fonds clairs, « sombre » (lettres blanches,
+ * accents vert d'eau et orange conservés) pour les fonds sombres et les photos.
+ * En-tête : déployé (monogramme + nom) en haut de page ; réduit au monogramme dès qu'on fait défiler.
  */
-export function LogoWord({ className }: { className?: string }) {
-  const s = LOGO.cap
+const base = import.meta.env.BASE_URL
+const SRC = (part: 'monogramme' | 'nom', tone: 'clair' | 'sombre') => `${base}brand/icrh-${part}-${tone}-entete.webp`
+
+/** tone « auto » : suit le thème de l'élément parent (.theme-dark / .theme-light, pied de page sombre) */
+export function Logo({ compact = false, tone = 'auto' }: { compact?: boolean; tone?: 'auto' | 'clair' | 'sombre' }) {
+  const tones = tone === 'auto' ? (['clair', 'sombre'] as const) : ([tone] as const)
   return (
-    <svg className={className} viewBox={`0 0 ${LOGO.wordW} ${s}`} aria-hidden="true" focusable="false">
-      <g fill="currentColor">
-        {LOGO.letters.map((l, i) => (
-          <path key={i} transform={`translate(${l.x} ${s}) scale(1 -1)`} d={l.d} />
+    <span className={`logo ${compact ? 'is-compact' : ''} logo-${tone}`}>
+      <span className="logo-mono">
+        {tones.map((t) => (
+          <img key={t} className={`on-${t}`} src={SRC('monogramme', t)} alt="" width={432} height={144} decoding="async" />
         ))}
-      </g>
-      <g dangerouslySetInnerHTML={{ __html: LOGO.defs + LOGO.eye }} />
-    </svg>
-  )
-}
-
-/** Icône seule (le C-œil). */
-export function LogoMark({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox={`0 0 ${LOGO.eyeSize} ${LOGO.eyeSize}`} aria-hidden="true" focusable="false">
-      <g dangerouslySetInnerHTML={{ __html: LOGO.defs + LOGO.eyeAlone }} />
-    </svg>
-  )
-}
-
-/**
- * Logo complet : mot-symbole + nom de l'institut, initiales dans la couleur de l'iris.
- * En version compacte, le nom se replie et le regard se tourne vers le visiteur.
- */
-export function Logo({ compact = false }: { compact?: boolean }) {
-  const [bx, by] = LOGO.irisBack
-  return (
-    <span className={`logo ${compact ? 'is-compact' : ''}`} style={{ ['--iris-x' as string]: `${bx}px`, ['--iris-y' as string]: `${by}px` }}>
-      <LogoWord className="logo-word" />
-      <span className="logo-name" aria-hidden="true">
-        <span>
-          <b>I</b>nstitut <b>C</b>hangeons de <b>R</b>egard
-        </span>{' '}
-        <span>
-          sur le <b>H</b>andicap
-        </span>
+      </span>
+      <span className="logo-name">
+        {tones.map((t) => (
+          <img key={t} className={`on-${t}`} src={SRC('nom', t)} alt="" width={226} height={144} decoding="async" />
+        ))}
       </span>
     </span>
   )
