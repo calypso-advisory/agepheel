@@ -37,7 +37,7 @@ export const SCENES: SceneAsset[] = [
   scene(3, 'Vue de côté : la salariée désigne du stylo un graphique affiché au mur ; l’équipe suit sa présentation.'),
   scene(4, 'Gros plan sur le graphique en barres croissantes que la salariée pointe avec son stylo.'),
   scene(5, 'Atelier : un salarié porteur de trisomie 21 réalise un assemblage technique au tournevis, entouré de deux collègues.'),
-  scene(6, 'Zone logistique : le même salarié transmet un colis à un collègue pendant qu’une collègue scanne une référence.'),
+  scene(6, 'Zone logistique : un salarié en fauteuil roulant ferme un colis sous le regard souriant de sa collègue.'),
   scene(7, 'Une salariée en fauteuil roulant échange une poignée de main avec un interlocuteur, ses collègues autour d’elle.'),
   scene(8, 'La salariée montre un écran du doigt à deux collègues penchés vers son poste.'),
   scene(9, 'Réunion de travail : la salariée prend la parole devant un écran présentant un plan de projet en quatre étapes.'),

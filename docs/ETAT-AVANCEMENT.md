@@ -6,12 +6,13 @@ Neuf clips Runway (Kling 3.0 Pro, 5 s chacun, image de départ et image d’arri
 
 | Temps | Clip / effet | Texte |
 |---|---|---|
-| Ouverture | c01 : très gros plan sur les yeux → recul sur la salariée | « Dans chaque entreprise, il y a des talents. » |
+| Accueil | c00 : plan d’équipe immobile tant qu’on ne fait pas défiler, puis plongée jusque dans ses yeux | Titre « Dans chaque entreprise, il y a des talents. », phrase de promesse, bouton « Faire le point sur ma situation » (`HERO` dans `content/site.ts`) |
+| Ouverture | c01 : très gros plan sur les yeux → recul sur la salariée | — |
 | Changer d’angle | c02 : rotation autour d’elle → l’équipe | « Certains méritent simplement qu’on les regarde autrement. » |
 | L’écran | c03 : plongée dans l’écran vierge | « Le handicap ne définit pas un talent. » |
 | Le graphique | L’écran devient la page ; graphique HTML ; la dernière barre s’ouvre en fenêtre sur l’atelier | « Ce sont ses compétences… » / « Quand chacun apporte… » |
 | Les mains | c04 : macro des mains → recul sur l’atelier | « Des compétences différentes. » / « Une même exigence de réussite. » |
-| Logistique | c05 : il se retourne, le colis passe de main en main | « Chaque métier a ses talents. » / « Chaque talent a sa place. » |
+| Logistique | c05 : de l’atelier, la caméra glisse jusqu’à l’entrepôt : un salarié en fauteuil ferme un colis | « Chaque métier a ses talents. » / « Chaque talent a sa place. » |
 | Collectif | Carte + volet vers le bureau | « Rien ne se construit seul. » / « La réussite est collective. » |
 | Le bureau | c06 : du poste de travail à la réunion | « L’inclusion ne s’improvise pas. » / « Elle se construit, ensemble. » |
 | La grue | c07 : montée jusqu’à la vue du dessus | « Identifier… » / « Construire… » / « Accompagner… » |

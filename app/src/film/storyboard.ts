@@ -25,7 +25,7 @@ export const CLIPS: ClipDef[] = [
   { id: 'c02', label: 'La caméra tourne autour d’elle et révèle ses collègues qui l’écoutent.', focal: [[0, 0.55], [1, 0.62]] },
   { id: 'c03', label: 'La caméra avance vers l’écran de présentation jusqu’à ce qu’il remplisse l’image.', focal: [[0, 0.62], [1, 0.5]] },
   { id: 'c04', label: 'Gros plan sur les mains d’un salarié qui assemble un module, puis la caméra recule sur l’atelier.', focal: [[0, 0.6], [1, 0.35]] },
-  { id: 'c05', label: 'Le salarié se tourne et transmet un colis à un collègue dans la zone logistique.', focal: [[0, 0.35], [1, 0.62]] },
+  { id: 'c05', label: 'Le salarié de l’atelier sourit à ses collègues ; la caméra glisse jusqu’à l’entrepôt, où un salarié en fauteuil roulant ferme un colis sous le regard de sa collègue.', focal: [[0, 0.52], [0.4, 0.52], [0.6, 0.47], [1, 0.47]] },
   { id: 'c06', label: 'Une salariée en fauteuil roulant quitte son poste et rejoint la réunion.', focal: [[0, 0.62], [1, 0.4]] },
   { id: 'c07', label: 'La caméra s’élève au-dessus de la table de réunion jusqu’à une vue de dessus.', focal: [[0, 0.4], [1, 0.5]] },
   { id: 'c07b', label: 'La caméra redescend de la vue du dessus et traverse le bureau jusqu’à la paroi vitrée.', focal: [[0, 0.5], [0.55, 0.5], [0.62, 0.45], [1, 0.3]] },

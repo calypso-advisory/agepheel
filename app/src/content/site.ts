@@ -35,7 +35,7 @@ export const SOLUTIONS = [
     text: 'Identifier les partenaires du secteur adapté et protégé et intégrer ces collaborations dans une démarche responsable.',
     to: '/entreprises-adaptees-esat',
     image: 'scene-06',
-    alt: 'Zone logistique : un salarié transmet un colis à un collègue.',
+    alt: 'Zone logistique : un salarié en fauteuil roulant ferme un colis, sa collègue l’observe en souriant.',
   },
   {
     id: 'obligations',
