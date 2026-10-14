@@ -27,6 +27,10 @@
 .fm-stage.is-ready .fm-poster {
   visibility: hidden;
 }
+/* tant que la première image n'est pas dessinée, la toile (opaque, noire) ne doit pas masquer l'affiche */
+.fm-stage:not(.is-ready) .fm-canvas {
+  opacity: 0;
+}
 
 .fm-paper {
   position: absolute;

@@ -233,6 +233,12 @@ export function Film({ onRequestStatic, onFail }: Props) {
 
     const preload = (st: FilmState) => {
       const idx = CLIP_ORDER.indexOf(st.clip.id)
+      // le clip affiché d'abord, seul : à l'arrivée, il ne partage pas la bande passante avec les suivants
+      const cur = seqs.get(st.clip.id)
+      if (cur && !cur.loaded) {
+        void cur.load().then(() => schedule())
+        return
+      }
       for (const k of [idx, idx + 1, idx + 2, idx - 1]) {
         const id = CLIP_ORDER[k]
         if (id) void seqs.get(id)?.load()

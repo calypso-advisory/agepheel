@@ -17,6 +17,7 @@ cd app && npm ci && npm run build && npx vite preview --port 4173 &
 node tests/e2e.mjs /tmp/e2e        # 17 vérifications fonctionnelles
 node tests/film.mjs /tmp/f 390x844 0,0.25,0.5,0.75,1 --mobile
 node tests/perf.mjs                # temps par image
+node tests/slownet.mjs /tmp/s.png    # connexion lente : l’affiche doit être visible avant le premier clip
 ```
 
 ## Contenus
