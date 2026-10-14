@@ -72,6 +72,8 @@ export default function App() {
         <Routes>
           <Route element={<Layout />}>
             <Route index element={<Home />} />
+            {/* essai du défilement par étapes (mobile), non indexé */}
+            <Route path="essai-etapes" element={<Home steps />} />
             <Route path="solutions" element={<SolutionsPage />} />
             <Route path="comprendre-oeth" element={<OethPage />} />
             <Route path="entreprises-adaptees-esat" element={<EaEsatPage />} />

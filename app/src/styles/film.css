@@ -638,3 +638,43 @@
     opacity: 0;
   }
 }
+
+/* ------------------------------ Essai : une étape par geste (mobile) ------------------------------ */
+html.snap-steps {
+  scroll-snap-type: y mandatory;
+}
+.fm-stops {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.fm-stop {
+  position: absolute;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+/* sortie du film : l'arrêt suivant est le haut de la section Solutions */
+html.snap-steps #solutions {
+  scroll-snap-align: start;
+}
+.fm-step {
+  position: absolute;
+  right: 16px;
+  top: calc(var(--nav-h) + 8px);
+  margin: 0;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(10, 22, 33, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--white);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+[data-layout='land'] .fm-step {
+  display: none;
+}

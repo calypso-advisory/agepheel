@@ -1,8 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { CTA, HERO, OETH } from '../content/site'
 import { FrameSequence, type SeqIndex } from '../film/sequence'
-import { beatStart, chartBarRect, computeLayout, evaluate, TOTAL, type FilmState, type Layout, type Rect } from '../film/film'
-import { ACTS, BEATS, CHART_BARS, CLIPS, KNOCKOUT_WORD, TEXTS } from '../film/storyboard'
+import { beatPoint, beatStart, chartBarRect, computeLayout, evaluate, TOTAL, type FilmState, type Layout, type Rect } from '../film/film'
+import { ACTS, BEATS, CHART_BARS, CLIPS, KNOCKOUT_WORD, STOPS, TEXTS } from '../film/storyboard'
 import { useTheme } from './themeContext'
 import { POSTER_V } from '../film/posters'
 
@@ -30,7 +30,10 @@ interface Manifest {
 
 interface Props {
   onFail: () => void
+  /** essai : en portrait, chaque geste mène à l'arrêt suivant (aimantation native du navigateur) */
+  steps?: boolean
 }
+const STOP_P = STOPS.map((s) => beatPoint(s.beat, s.u))
 
 /** ordre d'apparition des clips, pour précharger le suivant */
 const CLIP_ORDER = CLIPS.map((c) => c.id)
@@ -46,7 +49,7 @@ const focalOf = (id: string, t: number) => {
   return f[f.length - 1][1]
 }
 
-export function Film({ onFail }: Props) {
+export function Film({ onFail, steps = false }: Props) {
   const secRef = useRef<HTMLElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
   const { setTheme } = useTheme()
@@ -68,6 +71,15 @@ export function Film({ onFail }: Props) {
     const bars = Array.from(stage.querySelectorAll<HTMLElement>('.fm-bar'))
     const cta = q('.fm-cta')
     const hint = q('.fm-hint')
+    const stopEls = Array.from(sec.querySelectorAll<HTMLElement>('.fm-stop'))
+    const stepNum = stage.querySelector<HTMLElement>('.fm-step-n')
+    let lastStep = -1
+    // aimantation active seulement dans le film, en portrait : au-delà, la page défile librement
+    const updateSnap = () => {
+      if (!steps) return
+      const inFilm = window.scrollY <= top + dist + 4 && !L.land
+      document.documentElement.classList.toggle('snap-steps', inFilm)
+    }
     const cue = q('.fm-cue')
     // visiteur arrêté en plein film (portrait) : après 2 s sans défilement, l'invitation réapparaît
     let idle = false
@@ -216,6 +228,8 @@ export function Film({ onFail }: Props) {
       layoutKnock()
       top = sec.getBoundingClientRect().top + window.scrollY
       dist = Math.max(1, sec.offsetHeight - stage.clientHeight)
+      stopEls.forEach((el, i) => (el.style.top = `${(STOP_P[i] * dist).toFixed(1)}px`))
+      updateSnap()
       lastDrawKey = ''
     }
 
@@ -459,6 +473,14 @@ export function Film({ onFail }: Props) {
       if (st.cta < 0.5) cta.setAttribute('inert', '')
       else cta.removeAttribute('inert')
       op(hint, st.hint)
+      if (stepNum) {
+        let k = 0
+        for (let i = 0; i < STOP_P.length; i++) if (p >= STOP_P[i] - 0.002) k = i
+        if (k !== lastStep) {
+          lastStep = k
+          stepNum.textContent = `${k + 1} / ${STOP_P.length}`
+        }
+      }
       {
         // pas pendant l'accueil (qui a déjà son indication), ni à la conclusion, ni par-dessus un texte du film
         const textOn = Object.values(st.texts).some((a) => a > 0.3) || st.oeth.s1 + st.oeth.s2 + st.oeth.s3 > 0.3
@@ -507,6 +529,7 @@ export function Film({ onFail }: Props) {
       if (!raf) raf = requestAnimationFrame(render)
     }
     const onScroll = () => {
+      updateSnap()
       armIdle()
       schedule()
     }
@@ -540,11 +563,12 @@ export function Film({ onFail }: Props) {
       window.removeEventListener('pageshow', onResize)
       ro.disconnect()
       cancelAnimationFrame(raf)
+      document.documentElement.classList.remove('snap-steps')
       window.clearTimeout(idleTimer)
       for (const s of seqs.values()) s.release()
       setTheme('light')
     }
-  }, [onFail, setTheme])
+  }, [onFail, setTheme, steps])
 
   const goTo = (beat: (typeof BEATS)[number]['id']) => {
     const sec = secRef.current!
@@ -565,7 +589,14 @@ export function Film({ onFail }: Props) {
   }
 
   return (
-    <section ref={secRef} className="fm" style={{ ['--len' as string]: TOTAL }} aria-label="Récit interactif : Changeons de regard">
+    <section ref={secRef} className={`fm ${steps ? 'fm-steps' : ''}`} style={{ ['--len' as string]: TOTAL }} aria-label="Récit interactif : Changeons de regard">
+      {steps && (
+        <div className="fm-stops" aria-hidden="true">
+          {STOP_P.map((_, i) => (
+            <span key={i} className="fm-stop" />
+          ))}
+        </div>
+      )}
       <div ref={stageRef} className={`fm-stage ${ready ? 'is-ready' : ''}`} data-tone="dark">
         <picture className="fm-poster" aria-hidden="true">
           <source media="(max-aspect-ratio: 1/1)" srcSet={`${MEDIA}poster-m.webp?v=${POSTER_V}`} />
@@ -665,6 +696,12 @@ export function Film({ onFail }: Props) {
             </a>
           </div>
         </div>
+
+        {steps && (
+          <p className="fm-step" aria-hidden="true">
+            Étape <span className="fm-step-n">1 / {STOP_P.length}</span>
+          </p>
+        )}
 
         <p className="fm-cue" aria-hidden="true">
           Continuez à faire défiler pour voir la suite

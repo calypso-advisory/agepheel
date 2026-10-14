@@ -17,7 +17,7 @@ export function Navigation() {
   }, [])
   const loc = useLocation()
   const btnRef = useRef<HTMLButtonElement>(null)
-  const isHome = loc.pathname === '/'
+  const isHome = loc.pathname === '/' || loc.pathname === '/essai-etapes'
 
   useEffect(() => setOpen(false), [loc.pathname, loc.hash])
 

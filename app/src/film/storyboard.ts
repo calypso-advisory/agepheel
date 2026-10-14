@@ -112,3 +112,37 @@ export const ACTS = [
 export const KNOCKOUT_WORD = 'REGARD'
 
 export const CHART_BARS = ['Écoute', 'Rigueur', 'Créativité', 'Fiabilité', 'Engagement']
+
+/**
+ * Arrêts du mode « une étape par geste » (mobile, essai) : chaque arrêt tombe sur un moment complet
+ * (texte entièrement affiché, chiffre, écran partagé…). u = progression locale dans le temps.
+ */
+export const STOPS: { beat: BeatId; u: number }[] = [
+  { beat: 'open', u: 0 },
+  { beat: 'reveal', u: 0.5 },
+  { beat: 'orbit', u: 0.52 },
+  { beat: 'screen', u: 0.8 },
+  { beat: 'chart', u: 0.28 },
+  { beat: 'chart', u: 0.58 },
+  { beat: 'arm', u: 0.3 },
+  { beat: 'arm', u: 0.74 },
+  { beat: 'hands', u: 0.72 },
+  { beat: 'logi', u: 0.82 },
+  { beat: 'florist', u: 0.57 },
+  { beat: 'split', u: 0.45 },
+  { beat: 'split', u: 0.69 },
+  { beat: 'office', u: 0.27 },
+  { beat: 'desk', u: 0.6 },
+  { beat: 'crane', u: 0.44 },
+  { beat: 'crane', u: 0.69 },
+  { beat: 'crane', u: 0.93 },
+  { beat: 'results', u: 0.2 },
+  { beat: 'results', u: 0.8 },
+  { beat: 'glass', u: 0.53 },
+  { beat: 'oeth', u: 0.29 },
+  { beat: 'oeth', u: 0.6 },
+  { beat: 'oeth', u: 0.88 },
+  { beat: 'word', u: 0.2 },
+  { beat: 'eyes', u: 0.6 },
+  { beat: 'cta', u: 1 },
+]

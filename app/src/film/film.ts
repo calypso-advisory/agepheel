@@ -92,6 +92,16 @@ export function computeLayout(W: number, H: number): Layout {
 export const BEAT_LEN = BEATS.map((b) => b.len * PACE)
 export const TOTAL = BEAT_LEN.reduce((a, b) => a + b, 0)
 
+/** progression globale (0 → 1) d'un point (temps, progression locale) */
+export function beatPoint(id: BeatId, u: number) {
+  let acc = 0
+  for (let i = 0; i < BEATS.length; i++) {
+    if (BEATS[i].id === id) return Math.min(1, (acc + u * BEAT_LEN[i]) / TOTAL)
+    acc += BEAT_LEN[i]
+  }
+  return 0
+}
+
 export function beatStart(id: BeatId) {
   let acc = 0
   for (let i = 0; i < BEATS.length; i++) {
